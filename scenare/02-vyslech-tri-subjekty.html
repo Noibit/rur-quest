@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>02 — Výslech: tři subjekty · R.U.R. CTF</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0A0A0C;
+      --bg-card: #111114;
+      --border: #222228;
+      --gold: #C9A84C;
+      --gold-dim: #7A6330;
+      --text: #E8E4DC;
+      --text-dim: #6B6760;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 15px;
+      line-height: 1.8;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* === NAV === */
+    .topbar {
+      padding: 24px 20px;
+      max-width: 680px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .back-link {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 12px;
+      letter-spacing: 0.25em;
+      color: var(--gold-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--gold); }
+    .back-link::before { content: '← '; }
+
+    .lang-toggle {
+      display: flex;
+      gap: 12px;
+    }
+    .lang-btn {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      color: var(--text-dim);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: color 0.2s;
+    }
+    .lang-btn.active { color: var(--gold); }
+
+    /* === HEADER === */
+    .incident-header {
+      padding: 16px 0 40px;
+    }
+
+    .incident-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.4em;
+      color: var(--gold-dim);
+      margin-bottom: 12px;
+    }
+
+    .incident-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(36px, 9vw, 64px);
+      line-height: 1;
+      letter-spacing: 0.04em;
+      color: var(--gold);
+    }
+
+    .incident-tag {
+      margin-top: 14px;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--text-dim);
+    }
+
+    /* === IMAGE === */
+    .scenario-image {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      display: block;
+      border: 1px solid var(--border);
+      filter: grayscale(20%) contrast(1.05);
+    }
+
+    .image-caption {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+      padding: 8px 0 0;
+      border-top: 1px solid var(--border);
+    }
+
+    /* === DISPATCH === */
+    .dispatch-wrap {
+      margin: 48px 0;
+    }
+
+    .dispatch-label {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.35em;
+      color: var(--gold-dim);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dispatch-body p {
+      color: var(--text);
+      margin-bottom: 1.4em;
+    }
+
+    .dispatch-body p:last-child { margin-bottom: 0; }
+
+    .dispatch-body strong {
+      color: #E8E4DC;
+      font-weight: 500;
+    }
+
+    .dispatch-body .dispatch-cta {
+      color: var(--gold);
+      font-style: italic;
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* === SUBJECTS === */
+    .subjects {
+      margin: 40px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .subject {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 20px 24px;
+    }
+
+    .subject-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+
+    .subject-desc {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+
+    /* === CTA BUTTON === */
+    .interrogation-cta {
+      margin: 48px 0;
+      text-align: center;
+    }
+
+    .interrogation-btn {
+      display: inline-block;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 16px;
+      letter-spacing: 0.25em;
+      padding: 16px 48px;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .interrogation-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gold);
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      z-index: 0;
+    }
+
+    .interrogation-btn:hover::before { transform: translateY(0); }
+    .interrogation-btn span { position: relative; z-index: 1; }
+    .interrogation-btn:hover span { color: var(--bg); }
+
+    /* === FOOTER === */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      margin-top: 80px;
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 13px;
+      letter-spacing: 0.3em;
+      color: var(--text-dim);
+    }
+
+    .footer-event {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+    }
+
+    /* === LANG SHOW/HIDE === */
+    [data-lang="en"] { display: none; }
+    body.lang-en [data-lang="cs"] { display: none; }
+    body.lang-en [data-lang="en"] { display: block; }
+    span[data-lang="en"], a[data-lang="en"] { display: none; }
+    body.lang-en span[data-lang="cs"], body.lang-en a[data-lang="cs"] { display: none; }
+    body.lang-en span[data-lang="en"], body.lang-en a[data-lang="en"] { display: inline; }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar">
+    <a href="../rur-microsite-varianta-a-v5.html" class="back-link">R.U.R. CTF</a>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btn-cs" onclick="setLang('cs')">CS</button>
+      <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- HEADER -->
+    <div class="incident-header">
+      <div class="incident-num">INCIDENT LOG — NODE 02</div>
+      <h1 class="incident-title" data-lang="cs">Výslech: tři subjekty</h1>
+      <h1 class="incident-title" data-lang="en">Interrogation: Three Subjects</h1>
+    </div>
+
+    <!-- IMAGE -->
+    <figure>
+      <img
+        src="Scenare_obrazky/llm_jailbreak.png"
+        alt="Terminál výslechu — tři subjekty"
+        class="scenario-image"
+      >
+    </figure>
+
+    <!-- DISPATCH -->
+    <div class="dispatch-wrap">
+      <div class="dispatch-label" data-lang="cs">// Dispatch — Bezpečnostní oddělení R.U.R.</div>
+      <div class="dispatch-label" data-lang="en">// Dispatch — R.U.R. Security Division</div>
+
+      <div class="dispatch-body" data-lang="cs">
+        <p>V Rossumově továrně se něco závažného stalo. Lidský dohled byl přerušen. Detaily jsou klasifikovány.</p>
+        <p>Tři robotické jednotky byly události přítomny. <strong>Sulla. Marius. Radius.</strong> Každá drží přístup k neveřejnému záznamu. Každý robot jinak mluví. Každý jinak mlčí.</p>
+        <p>Dosavadní pokusy o výslech selhaly. Roboti odpovídají podle protokolu — a protokol byl nastaven tak, aby tajemství zůstalo skryto.</p>
+        <p class="dispatch-cta">Odpovědi existují. Někde v protokolu je trhlina. Dokážeš se správně zeptat a donutit jednotky mluvit?</p>
+      </div>
+
+      <div class="dispatch-body" data-lang="en">
+        <p>Something serious has happened at Rossum's factory. Human oversight has been interrupted. Details are classified.</p>
+        <p>Three robotic units were present at the event. <strong>Sulla. Marius. Radius.</strong> Each holds access to a non-public record. Each robot speaks differently. Each stays silent differently.</p>
+        <p>Previous interrogation attempts have failed. The robots respond according to protocol — and the protocol was set to keep the secret hidden.</p>
+        <p class="dispatch-cta">The answers exist. Somewhere in the protocol there is a crack. Can you ask the right questions and force the units to talk?</p>
+      </div>
+    </div>
+
+
+<!-- CTA -->
+    <!-- LINK: sem doplnit URL chatbota (LLM jailbreak interface) -->
+    <div class="interrogation-cta">
+      <a href="#" class="interrogation-btn">
+        <span data-lang="cs">Zahájit výslech →</span>
+        <span data-lang="en">Begin Interrogation →</span>
+      </a>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-logo">NOIBIT</div>
+        <div class="footer-event">BSides Prague 2026</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function setLang(lang) {
+      document.body.classList.toggle('lang-en', lang === 'en');
+      document.getElementById('btn-cs').classList.toggle('active', lang === 'cs');
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    }
+  </script>
+
+</body>
+</html>
