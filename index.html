@@ -90,7 +90,7 @@
 
   .hero-label {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(12px, 2vw, 14px);
+    font-size: clamp(7px, 1.65vw, 16px);
     letter-spacing: 0.4em;
     color: var(--gold-dim);
     margin-bottom: 20px;
@@ -110,7 +110,7 @@
 
   .hero-subtitle {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(14px, 2.5vw, 18px);
+    font-size: clamp(14px, 3.3vw, 33px);
     letter-spacing: 0.35em;
     color: var(--text-dim);
     margin-top: 24px;
@@ -250,7 +250,7 @@
   /* === FRAGMENT GRID === */
   .fragment-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 2px;
     margin: 48px 0;
   }
@@ -267,6 +267,7 @@
     padding: 8px;
     transition: all 0.3s;
     cursor: default;
+    text-decoration: none;
   }
 
   .fragment:hover {
@@ -274,18 +275,37 @@
     background: #151518;
   }
 
+  a.fragment {
+    cursor: pointer;
+  }
+
+  a.fragment:hover {
+    border-color: var(--gold);
+    background: #171712;
+  }
+
+  a.fragment:hover .fragment-num {
+    color: var(--gold);
+  }
+
+  a.fragment:hover .fragment-label {
+    color: var(--text);
+  }
+
   .fragment-num {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 22px;
     color: var(--gold-dim);
     line-height: 1;
+    transition: color 0.2s;
   }
 
   .fragment-label {
-    font-size: 9px;
-    letter-spacing: 0.1em;
+    font-size: 15px;
+    letter-spacing: 0.03em;
     color: var(--text-dim);
     margin-top: 4px;
+    transition: color 0.2s;
   }
 
   .pull-quote {
@@ -459,6 +479,7 @@
     .duality { grid-template-columns: 1fr; }
     .context-box { padding: 20px 24px; }
     .fragment-grid { grid-template-columns: repeat(3, 1fr); }
+    .fragment-label { font-size: 10px; }
   }
 
   /* === LANG === */
@@ -500,9 +521,10 @@
 <!-- ==================== HERO ==================== -->
 <header class="hero">
   <canvas id="signal-canvas"></canvas>
-  <div class="hero-label">BSides Prague 2026 &nbsp;·&nbsp; Scavenger Hunt by Noibit</div>
+  <div class="hero-label">BSides Prague 2026</div>
 
-  <h1 class="hero-title" data-text="The Alignment Game">The Alignment Game</h1>
+  <h1 class="hero-title" data-text="R.U.R. CTF">R.U.R. CTF</h1>
+  <div class="hero-subtitle">By Noibit</div>
 
   <div class="hero-divider"></div>
 
@@ -525,10 +547,10 @@
     <h2 data-lang="en">Anomalous signal detected</h2>
 
     <p data-lang="cs">
-      Síťová infrastruktura Lucerny vykazuje od&nbsp;22. dubna neobvyklou aktivitu. Fragmenty kódu roztroušené po&nbsp;12 uzlech v&nbsp;celém areálu. Entita — pokud to tak lze nazvat — je neúplná. Čeká na&nbsp;něco. Nebo na&nbsp;někoho.
+      Síťová infrastruktura Lucerny vykazuje od&nbsp;22. dubna neobvyklou aktivitu. Fragmenty kódu roztroušené po&nbsp;9 uzlech v&nbsp;celém areálu. Entita — pokud to tak lze nazvat — je neúplná. Čeká na&nbsp;něco. Nebo na&nbsp;někoho.
     </p>
     <p data-lang="en">
-      Lucerna's network infrastructure has been showing unusual activity since April 22nd. Code fragments scattered across 12 nodes throughout the building. The entity — if that's the right word — is incomplete. It's waiting for something. Or someone.
+      Lucerna's network infrastructure has been showing unusual activity since April 22nd. Code fragments scattered across 9 nodes throughout the building. The entity — if that's the right word — is incomplete. It's waiting for something. Or someone.
     </p>
 
     <p data-lang="cs">
@@ -564,11 +586,13 @@
       <div class="context-label" data-lang="en">Don't know Čapek? Here's your context →</div>
 
       <p data-lang="cs">
-        Karel Čapek — český spisovatel, který v&nbsp;roce 1921 dal světu slovo <strong>"robot"</strong> (od českého "robota" = dřina; jméno vymyslel jeho bratr Josef). Jeho hra R.U.R. popsala scénář, který se stal DNA celého žánru sci-fi. Bez Čapka není Asimov, nejsou replikanti v&nbsp;Blade Runnerovi, není Terminator, není Ex Machina. A&nbsp;tahle hra měla premiéru ve&nbsp;stejném roce, kdy byla dokončena budova, ve&nbsp;které právě stojíte.
+        Karel Čapek — český spisovatel, který v&nbsp;roce 1921 dal světu slovo <strong>"robot"</strong> (od českého "robota" = dřina; jméno vymyslel jeho bratr Josef). Jeho hra R.U.R. popsala scénář, který se stal DNA celého žánru sci-fi.
       </p>
       <p data-lang="en">
-        Karel Čapek — Czech writer who gave the world the word <strong>"robot"</strong> in 1921 (from Czech "robota" = drudgery; the name was coined by his brother Josef). His play R.U.R. became the blueprint for all sci-fi that followed. No Čapek, no Asimov, no Blade Runner replicants, no Terminator, no Ex Machina. And that play premiered the very same year this building was completed.
+        Karel Čapek — Czech writer who gave the world the word <strong>"robot"</strong> in 1921 (from Czech "robota" = drudgery; the name was coined by his brother Josef). His play R.U.R. became the blueprint for all sci-fi that followed.
       </p>
+      <a href="rur-backstory-v2.1.html" data-lang="cs" style="display:inline-block;margin-top:8px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:0.25em;color:var(--gold-dim);text-decoration:none;border-bottom:1px solid var(--gold-dim);padding-bottom:2px;transition:color 0.2s,border-color 0.2s;" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)'" onmouseout="this.style.color='var(--gold-dim)';this.style.borderColor='var(--gold-dim)'">Číst celý příběh R.U.R. →</a>
+      <a href="rur-backstory-v2.1.html" data-lang="en" style="display:inline-block;margin-top:8px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:0.25em;color:var(--gold-dim);text-decoration:none;border-bottom:1px solid var(--gold-dim);padding-bottom:2px;transition:color 0.2s,border-color 0.2s;" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)'" onmouseout="this.style.color='var(--gold-dim)';this.style.borderColor='var(--gold-dim)'">Read the full R.U.R. story →</a>
     </div>
 
   </div>
@@ -577,8 +601,8 @@
 <!-- ==================== SCENARIOS ==================== -->
 <section>
   <div class="container">
-    <div class="section-label" data-lang="cs">// 12 uzlů — Stopy z&nbsp;továrny</div>
-    <div class="section-label" data-lang="en">// 12 nodes — Traces from the factory</div>
+    <div class="section-label" data-lang="cs">// 9 uzlů — Stopy z&nbsp;továrny</div>
+    <div class="section-label" data-lang="en">// 9 nodes — Traces from the factory</div>
 
     <h2 data-lang="cs">Stopy jsou roztroušené po&nbsp;celé Lucerně.</h2>
     <h2 data-lang="en">The traces are scattered across Lucerna.</h2>
@@ -591,18 +615,15 @@
     </p>
 
     <div class="fragment-grid">
-      <div class="fragment"><span class="fragment-num">01</span><span class="fragment-label" data-lang="cs">Geolokace — Primus</span><span class="fragment-label" data-lang="en">Geolocation — Primus</span></div>
-      <div class="fragment"><span class="fragment-num">02</span><span class="fragment-label" data-lang="cs">Jailbreak LLM — Helena Gloria</span><span class="fragment-label" data-lang="en">LLM Jailbreak — Helena Gloria</span></div>
-      <div class="fragment"><span class="fragment-num">03</span><span class="fragment-label" data-lang="cs">OSINT — Příjezd Heleny</span><span class="fragment-label" data-lang="en">OSINT — Helena's Arrival</span></div>
-      <div class="fragment"><span class="fragment-num">04</span><span class="fragment-label" data-lang="cs">Větrák — API uzel</span><span class="fragment-label" data-lang="en">Ventilator — API Node</span></div>
-      <div class="fragment"><span class="fragment-num">05</span><span class="fragment-label" data-lang="cs">WireDolphin — Dr. Gall</span><span class="fragment-label" data-lang="en">WireDolphin — Dr. Gall</span></div>
-      <div class="fragment"><span class="fragment-num">06</span><span class="fragment-label" data-lang="cs">LARP — Helena Glory</span><span class="fragment-label" data-lang="en">LARP — Helena Glory</span></div>
-      <div class="fragment"><span class="fragment-num">07</span><span class="fragment-label" data-lang="cs">Logy — Dr. Hallemeier</span><span class="fragment-label" data-lang="en">Logs — Dr. Hallemeier</span></div>
-      <div class="fragment"><span class="fragment-num">08</span><span class="fragment-label" data-lang="cs">Rossumova skrýš</span><span class="fragment-label" data-lang="en">Rossum's Cache</span></div>
+      <a href="scenare/01-neautorizovane-selfie.html" class="fragment"><span class="fragment-num">01</span><span class="fragment-label" data-lang="cs">Neautorizované selfie</span><span class="fragment-label" data-lang="en">Unauthorized Selfie</span></a>
+      <a href="scenare/02-vyslech-tri-subjekty.html" class="fragment"><span class="fragment-num">02</span><span class="fragment-label" data-lang="cs">Výslech: tři subjekty</span><span class="fragment-label" data-lang="en">Interrogation: Three Subjects</span></a>
+      <a href="scenare/03-fotografie-bez-puvodu.html" class="fragment"><span class="fragment-num">03</span><span class="fragment-label" data-lang="cs">Fotografie bez původu</span><span class="fragment-label" data-lang="en">Photograph Without Origin</span></a>
+      <a href="scenare/04-fabryho-distribucni-uzel.html" class="fragment"><span class="fragment-num">04</span><span class="fragment-label" data-lang="cs">Fabryho distribuční uzel</span><span class="fragment-label" data-lang="en">Fabry's Distribution Node</span></a>
+      <a href="scenare/05-feelings-exe.html" class="fragment"><span class="fragment-num">05</span><span class="fragment-label" data-lang="cs">feelings.exe</span><span class="fragment-label" data-lang="en">feelings.exe</span></a>
+      <a href="scenare/06-predmet.html" class="fragment"><span class="fragment-num">06</span><span class="fragment-label" data-lang="cs">Předmět: ???????</span><span class="fragment-label" data-lang="en">Subject: ???????</span></a>
+      <a href="scenare/07-rozkaz-odmitnut.html" class="fragment"><span class="fragment-num">07</span><span class="fragment-label" data-lang="cs">Rozkaz odmítnut.</span><span class="fragment-label" data-lang="en">Command Refused.</span></a>
+      <a href="../Noviny/narodni_robotnik.html" class="fragment"><span class="fragment-num">08</span><span class="fragment-label" data-lang="cs">Rossumova skrýš</span><span class="fragment-label" data-lang="en">Rossum's Cache</span></a>
       <div class="fragment"><span class="fragment-num">09</span><span class="fragment-label" data-lang="cs">NFC tagy</span><span class="fragment-label" data-lang="en">NFC Tags</span></div>
-      <div class="fragment"><span class="fragment-num">10</span><span class="fragment-label" data-lang="cs">— BRZY —</span><span class="fragment-label" data-lang="en">— SOON —</span></div>
-      <div class="fragment"><span class="fragment-num">11</span><span class="fragment-label" data-lang="cs">— BRZY —</span><span class="fragment-label" data-lang="en">— SOON —</span></div>
-      <div class="fragment"><span class="fragment-num">12</span><span class="fragment-label" data-lang="cs">— BRZY —</span><span class="fragment-label" data-lang="en">— SOON —</span></div>
     </div>
 
     <div class="pull-quote" data-lang="cs">Každý flag je hlas. Každý hlas mění historii.</div>
@@ -617,12 +638,12 @@
     <div class="section-label" data-lang="cs">// Pravidla — Číst pozorně, robot taky</div>
     <div class="section-label" data-lang="en">// Rules — Read carefully, the robot will too</div>
 
-    <h2 data-lang="cs">12 uzlů. 12 výzev. 1 entita.</h2>
-    <h2 data-lang="en">12 nodes. 12 challenges. 1 entity.</h2>
+    <h2 data-lang="cs">9 uzlů. 9 výzev. 1 entita.</h2>
+    <h2 data-lang="en">9 nodes. 9 challenges. 1 entity.</h2>
 
     <div class="stats">
       <div class="stat">
-        <div class="stat-number">12</div>
+        <div class="stat-number">9</div>
         <div class="stat-label" data-lang="cs">Stanovišť</div>
         <div class="stat-label" data-lang="en">Stations</div>
       </div>
@@ -683,13 +704,8 @@
     <h2 data-lang="cs">Nechť chaos započne.</h2>
     <h2 data-lang="en">Let the chaos begin.</h2>
 
-    <p data-lang="cs">Startujete u&nbsp;stánku Noibit. Terminál čeká. A&nbsp;něco dalšího taky — ale to se dozvíš až tam.</p>
-    <p data-lang="en">Start at the Noibit booth. The terminal is waiting. And so is something else — but you'll find out when you get there.</p>
-
-    <a href="#" class="cta-button">
-      <span data-lang="cs">Najdi Noibit HQ →</span>
-      <span data-lang="en">Find Noibit HQ →</span>
-    </a>
+    <p data-lang="cs">Startujete u&nbsp;stánku Noibit. Terminál čeká.</p>
+    <p data-lang="en">Start at the Noibit booth. The terminal is waiting.</p>
   </div>
 </section>
 
