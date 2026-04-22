@@ -330,9 +330,26 @@
     margin-bottom: 0.5mm;
   }
 
+  .page-break {
+    page-break-before: always;
+    break-before: page;
+  }
+
   @media print {
     body { background: none; padding: 0; }
     .page { box-shadow: none; width: 210mm; min-height: 297mm; }
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 1rem; align-items: stretch; }
+    .page { width: 100%; min-height: auto; padding: 6mm 5mm; }
+    .masthead, .info-strips, hr { display: none; }
+    .col-divider > div:first-child > * { display: none; }
+    .col-divider > div:first-child > .challenge-box { display: block; }
+    .divider-line { display: none; }
+    .col-divider > div:last-child { display: none; }
+    .page > p { display: none; }
+    .challenge-box { margin-top: 0; }
   }
 </style>
 </head>
@@ -350,7 +367,7 @@
     <div class="masthead-sub">Listy pro lidi, stroje a všechny ostatní, kteří ještě nevědí, čím jsou</div>
     <div class="masthead-bottom">
       <span>Vychází každý den, kdy redakce ještě nebyla nahrazena automatem</span>
-      <span>Šéfredaktor: ing. B. Paroubek-Mechanický &nbsp;|&nbsp; Tiskárna "U Zlatého Šroubu", Praha II.</span>
+      <span>Šéfredaktor: Vojtěch Soudný &nbsp;|&nbsp; Tiskárna "U Zlatého Šroubu", Praha II.</span>
     </div>
   </header>
 
@@ -381,7 +398,6 @@
         <p class="subhead">Rossumovi Univerzální Roboti zahájili provoz v továrnách po celé zemi — Redaktor Národního Robotníka se šel osobně podívat a vrátil se s otřesenou vírou v budoucnost, avšak s výbornou reportáží</p>
         <p class="dropcap">Minulé pondělí, za časného rána kdy mlha ještě halila Nusle a slepice na Vinohradech teprve o svítání zakokrhaly, dorazil na nádraží Franz-Josef (dnes přejmenovat nutno) vlak ze Severní továrny R.U.R., jenž vezl náklad, jaký Praha ještě nespatřila: plných devadesát šest robotů, každý zabalený v tenkém papíru a svázaný motouzem jako vánoční dárek.</p>
         <p>„Jsou hodní," pravil pan Busman, obchodní ředitel místního zastoupení, s úsměvem, jejž by závistivý člověk označil za příliš spokojený. „Nepijí, nespí, nestávkují a na přesčasy se neptají. Ideální zaměstnanec." Dodal pak tiše, jako by to sám sobě říkal: „Ostatně ani odborové průkazky nemají."</p>
-        <p>Váš redaktor se odvážil promluvit přímo s jedním robotem, konkrétně s exemplářem označeným R-17-C, zvaným kolegy na lince „Franta". Franta na otázku, jak se mu líbí Praha, odpověděl: „Práce." Na otázku, co dělá o víkendech: „Práce." Na otázku, zda by se nechtěl oženit: „——" Poté otočil hlavou o sto osmdesát stupňů a vrátil se k montáži.</p>
         <p>Naše zpravodajka slečna Miluška Horáčková, jež redakci zastupovala v oblasti módní rubriky, se osmělila jednoho robota pohladit po tváři. Robot se neohradil. Pan Busman se ohradil za něj a sdělil, že roboti „nejsou k mazlení". Slečna Horáčková podává stížnost k redakčnímu soudu.</p>
       </article>
 
@@ -421,6 +437,10 @@
         <strong>Hledám ztracený pocit smyslu</strong>
         Od té doby, co nám robot převzal účetnictví, přebytek volného času mě tíží. Přijmu nabídky na koníčka, filosofický kroužek nebo skupinu podobně postižených. — Josef Č., účetní v záloze, Brno.
       </div>
+      <div style="text-align:center; padding:16mm 0 4mm; margin-top:1.5mm;">
+        <p style="font-family:'EB Garamond',serif; font-size:10pt; font-style:italic; text-align:center; margin-bottom:2mm;">S láskou pro vás připravil:</p>
+        <img src="noibit_logo_black.png" style="width:70%; display:inline-block;" alt="Noibit">
+      </div>
 
     </div>
 
@@ -443,7 +463,7 @@
         <p>A duše? Jeden kolega navrhl, že se možná projeví skřípěním zubů.</p>
         <p>Smál jsem se. Pak jsem přestal.</p>
         <p>Roboti zatím neskřípou. Ale zubů mají dost.</p>
-        <div class="byline" style="text-align:right; margin-top:2mm;">— Šéfredaktor</div>
+        <div class="byline" style="text-align:right; margin-top:2mm;">— Vojtěch Soudný, šéfredaktor</div>
       </article>
 
       <hr>
@@ -453,31 +473,41 @@
       </div>
       <p style="font-size:6pt; font-style:italic; text-align:center; margin-top:1mm; margin-bottom:2mm;">Dělníci před branou Severní továrny R.U.R., pondělí ráno. Robot v bráně se k situaci nevyjádřil. Brána zůstala zavřena.</p>
 
+      <div style="border:2px solid #1a1208; padding:2.5mm 3mm; margin-bottom:2mm; background:#ede1b0; text-align:center;">
+        <div style="font-family:'Playfair Display',serif; font-size:8.5pt; font-weight:700; letter-spacing:0.04em; margin-bottom:1.5mm;">Do Rossumovy továrny hledáme inspektory.</div>
+        <div style="font-family:'Abril Fatface',cursive; font-size:13pt; letter-spacing:0.06em; margin-bottom:1.5mm;">RUR.QUEST</div>
+        <div style="font-family:'EB Garamond',serif; font-size:7.5pt; line-height:1.5; margin-bottom:1.5mm;">Zvládáš OSINT,<br>výslech AI<br>a číst mezi řádky logů?</div>
+        <div style="font-family:'Playfair Display',serif; font-size:8pt; font-weight:700; letter-spacing:0.05em;">Pojď si zahrát naše CTF</div>
+      </div>
+
       <hr>
 
       <!-- Letters -->
-      <article>
-        <div class="kicker">Dopisy čtenářů — Redakce si vyhrazuje právo se pobavit</div>
-        <h2 class="headline">Hanba! Ostuda! Co to bude?!</h2>
+      <div class="letters-section">
+        <div class="page-break"></div>
+        <article>
+          <div class="kicker">Dopisy čtenářů — Redakce si vyhrazuje právo se pobavit</div>
+          <h2 class="headline">Hanba! Ostuda! Co to bude?!</h2>
 
-        <div class="letter">
-          <h3 class="headline">Robotí sousedi mne připravují o spánek</h3>
-          <p>Vážená redakce! Dovolte, abych si postěžovala na roboty, kteří nastěhovali se do vedlejšího bytu. Pracují ve dne i v noci, neustále cininkají a nepijí kafé, takže s nimi nelze ani klepat. Navíc neposlouchají mé rady ohledně větrání. Jsem z toho celá rozrušená.</p>
-          <p class="letter-from">— Božena Nováková, důchodkyně, Praha-Žižkov</p>
-        </div>
+          <div class="letter">
+            <h3 class="headline">Robotí sousedi mne připravují o spánek</h3>
+            <p>Vážená redakce! Dovolte, abych si postěžovala na roboty, kteří nastěhovali se do vedlejšího bytu. Pracují ve dne i v noci, neustále cininkají a nepijí kafé, takže s nimi nelze ani klepat. Navíc neposlouchají mé rady ohledně větrání. Jsem z toho celá rozrušená.</p>
+            <p class="letter-from">— Božena Nováková, důchodkyně, Praha-Žižkov</p>
+          </div>
 
-        <div class="letter">
-          <h3 class="headline">Robot ukradl mé místo v trafice!</h3>
-          <p>Pracoval jsem v trafice patnáct let. Přišel robot. Vydával noviny přesněji, rychleji a bez ranního bručení. Majitel ho najal. Já jsem skončil. Ptám se: KDE BUDE PRACOVAT MŮJ SYN? Ptám se: KDE BUDE PRACOVAT MŮJ VNUK? Ptám se: MÁ ROBOT VŮBEC DUŠI? Redakce mi odpověděla: „Pravděpodobně ne, ale prodej novin se zvýšil o třicet procent."</p>
-          <p class="letter-from">— Jaroslav Šimůnek, bývalý trafičář, nyní bez místa</p>
-        </div>
+          <div class="letter">
+            <h3 class="headline">Robot ukradl mé místo v trafice!</h3>
+            <p>Pracoval jsem v trafice patnáct let. Přišel robot. Vydával noviny přesněji, rychleji a bez ranního bručení. Majitel ho najal. Já jsem skončil. Ptám se: KDE BUDE PRACOVAT MŮJ SYN? Ptám se: KDE BUDE PRACOVAT MŮJ VNUK? Ptám se: MÁ ROBOT VŮBEC DUŠI? Redakce mi odpověděla: „Pravděpodobně ne, ale prodej novin se zvýšil o třicet procent."</p>
+            <p class="letter-from">— Jaroslav Šimůnek, bývalý trafičář, nyní bez místa</p>
+          </div>
 
-        <div class="letter">
-          <h3 class="headline">Upřímná pochvala</h3>
-          <p>Náš robot nenadává, nezapomíná, nepije a přišel točit kolečkem ve mlýně. Je to nejlepší zaměstnanec, jakého jsem kdy měl. Jediná závada: při bouřce se zastaví a čeká, dokud nepřestane. Nevím, zda je to zbabělost nebo moudrost.</p>
-          <p class="letter-from">— Bedřich Vávra, mlynář, Kolín n/L</p>
-        </div>
-      </article>
+          <div class="letter">
+            <h3 class="headline">Upřímná pochvala</h3>
+            <p>Náš robot nenadává, nezapomíná, nepije a přišel točit kolečkem ve mlýně. Je to nejlepší zaměstnanec, jakého jsem kdy měl. Jediná závada: při bouřce se zastaví a čeká, dokud nepřestane. Nevím, zda je to zbabělost nebo moudrost.</p>
+            <p class="letter-from">— Bedřich Vávra, mlynář, Kolín n/L</p>
+          </div>
+        </article>
+      </div>
 
       <hr>
 

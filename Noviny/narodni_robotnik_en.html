@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The National Robotist – 1921</title>
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #d4c49a;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 2rem;
+    font-family: 'EB Garamond', Georgia, serif;
+  }
+
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    background: #f5e9c8;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+    padding: 8mm 10mm;
+    color: #1a1208;
+    position: relative;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.4);
+  }
+
+  /* ── MASTHEAD ─────────────────────────────── */
+  .masthead {
+    text-align: center;
+    border-top: 3px solid #1a1208;
+    border-bottom: 3px double #1a1208;
+    padding: 3mm 0 2mm;
+    margin-bottom: 2mm;
+  }
+  .masthead-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-size: 6.5pt;
+    font-family: 'Playfair Display', serif;
+    letter-spacing: 0.04em;
+    padding-bottom: 1mm;
+    border-bottom: 0.5px solid #1a1208;
+    margin-bottom: 1mm;
+  }
+  .masthead-title {
+    font-family: 'Abril Fatface', cursive;
+    font-size: 38pt;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: #0f0b05;
+  }
+  .masthead-sub {
+    font-family: 'Playfair Display', serif;
+    font-size: 7.5pt;
+    letter-spacing: 0.15em;
+    margin-top: 0.5mm;
+    font-style: italic;
+  }
+  .masthead-bottom {
+    display: flex;
+    justify-content: space-between;
+    font-size: 6pt;
+    font-family: 'Playfair Display', serif;
+    padding-top: 1mm;
+    border-top: 0.5px solid #1a1208;
+    margin-top: 1mm;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── RULE ─────────────────────────────────── */
+  hr { border: none; border-top: 1px solid #1a1208; margin: 1.5mm 0; }
+  hr.thick { border-top: 2px solid #1a1208; }
+  hr.double { border-top: 3px double #1a1208; }
+
+  /* ── LAYOUT ───────────────────────────────── */
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    column-gap: 5mm;
+  }
+  .col-divider {
+    display: grid;
+    grid-template-columns: 1fr 0.5px 1fr;
+    gap: 0 4mm;
+    align-items: start;
+  }
+  .divider-line {
+    background: #1a1208;
+    width: 0.5px;
+    align-self: stretch;
+  }
+  .full-width { grid-column: 1 / -1; }
+
+  /* ── ARTICLE ──────────────────────────────── */
+  article { margin-bottom: 3mm; }
+
+  .kicker {
+    font-family: 'Playfair Display', serif;
+    font-size: 6.5pt;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-top: 2px solid #1a1208;
+    border-bottom: 1px solid #1a1208;
+    padding: 0.5mm 0;
+    margin-bottom: 1mm;
+  }
+
+  h1.headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 16pt;
+    line-height: 1.15;
+    font-weight: 700;
+    margin-bottom: 1mm;
+  }
+  h1.headline-lg {
+    font-family: 'Playfair Display', serif;
+    font-size: 20pt;
+    line-height: 1.1;
+    font-weight: normal;
+    text-align: center;
+    margin-bottom: 1.5mm;
+  }
+  h2.headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 11pt;
+    line-height: 1.2;
+    font-weight: 700;
+    margin-bottom: 1mm;
+  }
+  h3.headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 9pt;
+    line-height: 1.2;
+    font-weight: 400;
+    font-style: italic;
+    margin-bottom: 0.5mm;
+  }
+
+  .subhead {
+    font-style: italic;
+    font-size: 7.5pt;
+    line-height: 1.4;
+    margin-bottom: 1.5mm;
+    border-bottom: 0.5px solid #1a1208;
+    padding-bottom: 1mm;
+  }
+
+  p {
+    font-size: 7.5pt;
+    line-height: 1.55;
+    margin-bottom: 1mm;
+    text-align: justify;
+    hyphens: auto;
+  }
+
+  p.dropcap::first-letter {
+    font-family: 'Abril Fatface', cursive;
+    font-size: 30pt;
+    float: left;
+    line-height: 0.75;
+    margin-right: 1.5mm;
+    margin-top: 1mm;
+    color: #0f0b05;
+  }
+
+  .byline {
+    font-size: 6pt;
+    font-style: italic;
+    margin-bottom: 1mm;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── ILLUSTRATION PLACEHOLDER ─────────────── */
+  .illustration {
+    width: 100%;
+    background: #e8d9a8;
+    border: 1px solid #1a1208;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    font-style: italic;
+    font-size: 6.5pt;
+    color: #5a4a2a;
+    margin: 1.5mm 0;
+    padding: 2mm;
+    min-height: 22mm;
+  }
+
+  /* ── ADS ──────────────────────────────────── */
+  .ad-box {
+    border: 1.5px solid #1a1208;
+    padding: 2mm;
+    margin-bottom: 2mm;
+    text-align: center;
+    background: #ede1b0;
+  }
+  .ad-box .ad-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 9pt;
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid #1a1208;
+    padding-bottom: 0.5mm;
+    margin-bottom: 1mm;
+  }
+  .ad-box p {
+    text-align: center;
+    font-size: 7pt;
+  }
+  .ad-box .ad-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 10pt;
+    margin-top: 1mm;
+  }
+  .ad-small {
+    border: 1px solid #1a1208;
+    padding: 1.5mm 2mm;
+    margin-bottom: 1.5mm;
+    font-size: 6.5pt;
+    line-height: 1.45;
+  }
+  .ad-small strong {
+    font-family: 'Playfair Display', serif;
+    font-size: 8pt;
+    display: block;
+    margin-bottom: 0.3mm;
+  }
+
+  /* ── CHALLENGE BOX ────────────────────────── */
+  .challenge-box {
+    border: 2.5px double #1a1208;
+    padding: 3mm;
+    margin: 2mm 0;
+    text-align: center;
+    background: #f0e4b5;
+    position: relative;
+  }
+  .challenge-box::before {
+    content: "✦";
+    position: absolute;
+    top: -3.5mm;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #f0e4b5;
+    padding: 0 2mm;
+    font-size: 8pt;
+  }
+  .challenge-box .challenge-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 10pt;
+    letter-spacing: 0.08em;
+    margin-bottom: 1mm;
+  }
+  .challenge-box p {
+    text-align: center;
+    font-size: 7pt;
+    font-style: italic;
+  }
+
+  /* ── LETTERS ──────────────────────────────── */
+  .letter {
+    margin-bottom: 2mm;
+  }
+  .letter .letter-from {
+    font-size: 6pt;
+    font-style: italic;
+    text-align: right;
+    margin-top: 0.5mm;
+  }
+
+  /* ── WEATHER + BURZA ──────────────────────── */
+  .info-strips {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2mm;
+    margin-bottom: 2mm;
+  }
+  .weather-strip {
+    border: 1px solid #1a1208;
+    padding: 1mm 2mm;
+    font-size: 6pt;
+    font-family: 'Playfair Display', serif;
+    background: #ede1b0;
+    letter-spacing: 0.05em;
+  }
+  .weather-strip .strip-label {
+    font-weight: 700;
+    font-size: 5.5pt;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-bottom: 0.5px solid #1a1208;
+    padding-bottom: 0.5mm;
+    margin-bottom: 0.5mm;
+  }
+
+  /* ── SECTION HEAD ─────────────────────────── */
+  .section-head {
+    font-family: 'Playfair Display', serif;
+    font-size: 12pt;
+    font-weight: 700;
+    text-align: center;
+    border-top: 2px solid #1a1208;
+    border-bottom: 1px solid #1a1208;
+    padding: 1.5mm 0 1mm;
+    margin: 3mm 0 2mm;
+    letter-spacing: 0.04em;
+  }
+
+@media print {
+    body { background: none; padding: 0; }
+    .page { box-shadow: none; width: 210mm; min-height: 297mm; }
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 1rem; align-items: stretch; }
+    .page { width: 100%; min-height: auto; padding: 6mm 5mm; }
+    .masthead, .info-strips, hr { display: none; }
+    .col-divider > div:first-child > * { display: none; }
+    .col-divider > div:first-child > .challenge-box { display: block; }
+    .divider-line { display: none; }
+    .col-divider > div:last-child { display: none; }
+    .page > p { display: none; }
+    .challenge-box { margin-top: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="page" lang="en">
+
+  <!-- MASTHEAD -->
+  <header class="masthead">
+    <div class="masthead-top">
+      <span>Vol. I. — No. 7.</span>
+      <span>Wednesday, 22nd April, Year of Our Lord 1921</span>
+      <span>Price: 20 hellers &nbsp;(robots pay double)</span>
+    </div>
+    <div class="masthead-title">The National Robotist</div>
+    <div class="masthead-sub">A paper for people, machines, and all others who have yet to decide what they are</div>
+    <div class="masthead-bottom">
+      <span>Published every day the editorial staff has not yet been replaced by an automaton</span>
+      <span>Editor-in-Chief: Vojtěch Soudný &nbsp;|&nbsp; Press "At the Golden Bolt", Prague II.</span>
+    </div>
+  </header>
+
+  <!-- WEATHER + EXCHANGE STRIPS -->
+  <div class="info-strips">
+    <div class="weather-strip">
+      <div class="strip-label">Weather</div>
+      Humidity 73% — joints advised to be lubricated. Morning dew. Robots at lower elevations warned of rust.
+    </div>
+    <div class="weather-strip">
+      <div class="strip-label">Exchange</div>
+      R.U.R. Corp. 340 K ↑ &nbsp;|&nbsp; Rossum Refinery 128 K ↑ &nbsp;|&nbsp; Workers' Syndicate 2 K ↓ &nbsp;|&nbsp; Humanitarian League: unlisted
+    </div>
+  </div>
+
+  <hr class="thick">
+
+  <!-- TWO COLUMNS: main body -->
+  <div class="col-divider">
+
+    <!-- LEFT COLUMN -->
+    <div>
+
+      <!-- Main article body -->
+      <article>
+        <div class="kicker">First-Class News — A Matter of National Importance</div>
+        <h1 class="headline">The Robots Have Arrived! Factories Rejoice, Workers Less So</h1>
+        <p class="subhead">Rossum's Universal Robots have commenced operations in factories across the country — Our correspondent went to see for himself and returned with his faith in progress shaken, but his reportage excellent</p>
+        <p class="dropcap">Last Monday, in the early hours when fog still clung to Nusle and the chickens of Vinohrady had only just begun to crow, the Franz-Josef station received a train from the Northern R.U.R. factory carrying a cargo the likes of which Prague had never seen: a full ninety-six robots, each wrapped in thin paper and tied with string like a Christmas parcel.</p>
+        <p>"They are well-behaved," said Mr. Busman, the regional sales director, with a smile that an envious man might call rather too satisfied. "They do not drink, do not sleep, do not strike, and never ask about overtime." He added quietly, as if to himself: "They have no union cards, either."</p>
+        <p>Our correspondent, Miss Miluška Horáčková, representing the fashion desk, ventured to pat one robot on the cheek. The robot did not object. Mr. Busman objected on its behalf and stated that robots "are not for cuddling." Miss Horáčková has filed a complaint with the editorial tribunal.</p>
+      </article>
+
+      <hr>
+
+      <!-- PHOTO -->
+      <div class="illustration" style="padding:0; background:none; border:1px solid #1a1208;">
+        <img src="vojtech7472_A_vintage_1920s_black_and_white_press_photograph__3d5e3473-993c-47f9-b848-eb9dd6f02ee7_1.png" style="width:100%; display:block;" alt="Franta at the platform">
+      </div>
+      <p style="font-size:6pt; font-style:italic; text-align:center; margin-top:1mm; margin-bottom:2mm;">"Franta" (R-17-C), as captured by our photographer at the platform. Franta declined to comment.</p>
+
+      <hr>
+
+      <!-- CHALLENGE BOX -->
+      <div class="challenge-box">
+        <div class="challenge-title">⚙ Rossum's Cache — A Matter of Public Interest ⚙</div>
+
+        <p style="text-align:left; margin-bottom:1.5mm;"><strong style="font-size:8pt;">A mysterious box has been tormenting visitors since morning</strong></p>
+
+        <p style="text-align:left;">At the exhibition grounds today, a remarkable little box was observed — one that refuses to open. Its front panel blinks with clues, something inside hisses and slides. Its owners — a group of biological employees of the firm Noibit, s.r.o., known elsewhere as <em>"the last people who still walk to work"</em> — claim the box was built by old Rossum himself, shortly before his creations stopped listening.</p>
+
+        <p style="text-align:left; margin-top:1mm;">The box bears the name <strong>Rossum's Cache</strong>. A secret is said to lie within. The display hints. The servos resist. The lock says nothing. Whoever opens it shall enter history (or at minimum receive applause).</p>
+
+        <p style="text-align:left; margin-top:1mm; font-style:italic; font-size:6.8pt;">Interested parties may consult the organic units of Noibit at their stand. They are approachable, speak both English and Robotic, and have coffee on hand for emergencies.</p>
+
+        <div style="margin-top:2mm; border-top:1px solid #8a7040; padding-top:1.5mm; font-size:7pt; letter-spacing:0.06em; text-align:center; color:#5a3a10;">
+          Noibit Stand — Organic units happy to help you get started
+        </div>
+      </div>
+
+      <div class="section-head">Love, Rust & Tenderness</div>
+      <div class="ad-small">
+        <strong>Heart Seeks a Heart of Steel</strong>
+        Widower (53), owns a hat, three cats and a two-room flat in Žižkov, seeks a female robot for long-term cohabitation. Requirements: quietness, reliability, ability to wind the alarm clock and refrain from grumbling at breakfast. Romantic inclinations welcome but not essential. Replies to "The Lonely Machinist" c/o the editorial office. Widows of the non-robotic variety need not respond — previous experience has been instructive.
+      </div>
+      <div class="ad-small">
+        <strong>Seeking a Lost Sense of Purpose</strong>
+        Ever since the robot took over our bookkeeping, the surplus of free time has become oppressive. Accepting offers of hobbies, philosophical circles, or groups of similarly afflicted individuals. — Josef Č., accountant (retired by automation), Brno.
+      </div>
+      <div style="text-align:center; padding:16mm 0 4mm; margin-top:1.5mm;">
+        <p style="font-family:'EB Garamond',serif; font-size:10pt; font-style:italic; text-align:center; margin-bottom:2mm;">Prepared for you with love by:</p>
+        <img src="noibit_logo_black.png" style="width:70%; display:inline-block;" alt="Noibit">
+      </div>
+
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="divider-line"></div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+
+      <!-- Feuilleton -->
+      <article>
+        <div class="kicker">Feuilleton — A Word from the Editor-in-Chief</div>
+        <h2 class="headline">On the Gnashing of Teeth and Other Signs of a Soul</h2>
+        <p class="dropcap">I ask myself: how shall we know, when it comes?</p>
+        <p>Old Mr. Rossum once explained to me — I was younger then, and believed in progress more than I do today — that robots would one day produce so much wheat, so much cloth, so much of everything, that things would cease to have value. People would live solely to improve themselves. A beautiful vision. Like every vision that fails to account for people.</p>
+        <p>Young Mr. Rossum — the more practical of the two — informed me, with the expression of a man who has just solved a chess problem, that robots from different factories would be made deliberately different. Different language. Different prejudices. So they could not communicate. So they would hate one another in the way we will have taught them to hate.</p>
+        <p>I paused at that.</p>
+        <p>I understood. And that was precisely what troubled me.</p>
+        <p>To create a being in one's own image — and then ensure that image is fragmented and hostile to itself. Nothing is more foreign to a man than his own reflection. When we look at robots — at their labour, their silence, their flawlessness — we see ourselves. What we wish to be. Or what we fear we are becoming.</p>
+        <p>And the soul? A colleague suggested it might manifest as gnashing of teeth.</p>
+        <p>I laughed. Then I stopped.</p>
+        <p>The robots do not yet gnash. But they have plenty of teeth.</p>
+        <div class="byline" style="text-align:right; margin-top:2mm;">— Vojtěch Soudný, Editor-in-Chief</div>
+      </article>
+
+      <hr>
+
+      <div class="illustration" style="padding:0; background:none; border:1px solid #1a1208;">
+        <img src="vojtech7472_A_vintage_1920s_black_and_white_press_photograph__5afaa405-7587-4f30-a3d2-eb23a772689f_1.png" style="width:100%; display:block;" alt="Workers at the factory gates">
+      </div>
+      <p style="font-size:6pt; font-style:italic; text-align:center; margin-top:1mm; margin-bottom:2mm;">Workers at the gates of the Northern R.U.R. factory, Monday morning. The robot in the gateway declined to comment. The gates remained shut.</p>
+
+      <div style="border:2px solid #1a1208; padding:2.5mm 3mm; margin-bottom:2mm; background:#ede1b0; text-align:center;">
+        <div style="font-family:'Playfair Display',serif; font-size:8.5pt; font-weight:700; letter-spacing:0.04em; margin-bottom:1.5mm;">Rossum's factory is looking for inspectors.</div>
+        <div style="font-family:'Abril Fatface',cursive; font-size:13pt; letter-spacing:0.06em; margin-bottom:1.5mm;">RUR.QUEST</div>
+        <div style="font-family:'EB Garamond',serif; font-size:7.5pt; line-height:1.5; margin-bottom:1.5mm;">Can you handle OSINT,<br>interrogating AI<br>and reading between log lines?</div>
+        <div style="font-family:'Playfair Display',serif; font-size:8pt; font-weight:700; letter-spacing:0.05em;">Come play our CTF</div>
+      </div>
+
+      <hr>
+
+      <!-- Letters -->
+      <div class="letters-section">
+        <article>
+          <div class="kicker">Letters to the Editor — The Editorial Board Reserves the Right to Be Amused</div>
+          <h2 class="headline">Outrage! Scandal! What is to be done?!</h2>
+
+          <div class="letter">
+            <h3 class="headline">Robot neighbours are depriving me of sleep</h3>
+            <p>Dear Editor! Allow me to complain about the robots who have moved into the flat next door. They work day and night, constantly clanking, and do not drink coffee, so one cannot even knock and have a chat. They also ignore my advice on ventilation. I am quite beside myself.</p>
+            <p class="letter-from">— Božena Nováková, pensioner, Prague-Žižkov</p>
+          </div>
+
+          <div class="letter">
+            <h3 class="headline">A robot has stolen my place at the kiosk!</h3>
+            <p>I worked at the newspaper kiosk for fifteen years. A robot arrived. It dispensed papers more accurately, more quickly, and without the morning grumbling. The owner hired it. I was let go. I ask: WHERE WILL MY SON WORK? I ask: WHERE WILL MY GRANDSON WORK? I ask: DOES A ROBOT EVEN HAVE A SOUL? The editorial office replied: "Probably not, but newspaper sales are up thirty percent."</p>
+            <p class="letter-from">— Jaroslav Šimůnek, former newsagent, currently without position</p>
+          </div>
+
+          <div class="letter">
+            <h3 class="headline">A sincere word of praise</h3>
+            <p>Our robot does not curse, does not forget, does not drink, and arrived to turn the wheel at the mill. It is the finest employee I have ever had. The only fault: during a storm it stops and waits until it passes. I cannot tell whether this is cowardice or wisdom.</p>
+            <p class="letter-from">— Bedřich Vávra, miller, Kolín upon Elbe</p>
+          </div>
+        </article>
+      </div>
+
+      <hr>
+
+      <!-- FROM SCIENTIFIC CIRCLES -->
+      <article>
+        <div class="kicker">From Scientific Circles — News No One Understands, Yet Everyone Finds Unsettling</div>
+        <h2 class="headline">Dr. Gall Declines to Comment. Rather Hastily.</h2>
+        <p>Dr. Gall, physiologist at the R.U.R. factory, refuses to comment on reports that experiments of an "unauthorised nature" are taking place in his laboratory. When asked whether it is true that he has been secretly modifying the robots' control units, he replied: "Nonsense." When asked why his laboratory generates network traffic at night in volumes sufficient to power an entire film festival, he replied: "I enjoy films." When asked whether he is aware that a dump from the company's WireDolphin system dated 21st April has been intercepted — he excused himself and left. Rather hastily.</p>
+        <p style="font-size:6.5pt; font-style:italic;">The investigation continues. Those familiar with network protocols will know what to look for.</p>
+      </article>
+
+      <hr>
+
+      <!-- AD BOX -->
+      <div class="ad-box">
+        <div class="ad-title">R.U.R. — Rossum's Universal Robots</div>
+        <p><em>"They work, they are silent, they do not insult the customers."</em></p>
+        <p style="margin-top:1mm;">Robots for home — factory — office — political party.<br>
+        Models: Industrious Karel · Caring Helena · Silent Clerk Viktor<br>
+        <strong>New model: The Robot Director</strong> — decides without emotion, immune to bribery.</p>
+        <div class="ad-price">From 47 K · Instalments available · 2-year guarantee or 10,000 working hours</div>
+        <p style="margin-top:1mm; font-size:5.5pt; font-style:italic;">Warning: R.U.R. accepts no liability for existential crises arising from purchase of this product.</p>
+      </div>
+
+    </div>
+  </div><!-- /col-divider -->
+
+  <hr class="double" style="margin-top:3mm;">
+  <p style="text-align:center; font-size:5.5pt; font-style:italic; margin-top:1mm; letter-spacing:0.05em;">
+    The National Robotist — published every working day. Editorial offices at 7 Old Bolt Street, Prague II. The editors accept no responsibility for the contents of advertisements, particularly those submitted by robots.
+    Manuscripts are not returned. Robots always are.
+  </p>
+
+</div><!-- /page -->
+</body>
+</html>

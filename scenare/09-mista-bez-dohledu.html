@@ -164,13 +164,17 @@
       text-decoration: none;
       border: 1px solid var(--gold-dim);
       padding: 14px 24px;
-      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      background: linear-gradient(to top, var(--gold) 50%, transparent 50%);
+      background-size: 100% 200%;
+      background-position: top;
+      transition: background-position 0.3s ease, color 0.3s ease, border-color 0.2s;
     }
     .node-link::before { content: '[ '; }
     .node-link::after  { content: ' ]'; }
     .node-link:hover {
       border-color: var(--gold);
-      background: rgba(201, 168, 76, 0.06);
+      background-position: bottom;
+      color: var(--bg);
     }
 
     footer {
@@ -272,6 +276,19 @@
         <p>Throughout the entire building, there are many such places. Your goal is to find at least <strong>6</strong> of them, read the password of each resonant communication point, and record it.</p>
         <p class="dispatch-cta">If you enter at least 6 of these passwords into the special system that the robots used for their subsequent secret communication, what you seek will be revealed… You can find the system at: <strong><a href="http://rur.lol" style="color:var(--gold);text-decoration:none;" target="_blank">rur.lol</a></strong></p>
       </div>
+    </div>
+
+    <!-- NFC TAG REFERENCE -->
+    <div style="margin: 40px 0;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:0.35em;color:var(--gold-dim);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);" data-lang="cs">// Vzor — takhle vypadá tag, který hledáš</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:0.35em;color:var(--gold-dim);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);" data-lang="en">// Reference — this is what the tag looks like</div>
+      <img
+        src="Scenare_obrazky/nfc_tag.png"
+        alt="Vzor NFC tagu"
+        style="width:100%;max-width:360px;display:block;margin:0 auto;border:1px solid var(--border);filter:grayscale(20%) contrast(1.05);"
+      >
+      <p style="font-size:11px;letter-spacing:0.15em;color:var(--text-dim);margin-top:8px;text-align:center;" data-lang="cs">Hledej tento pattern — tagy jsou rozmístěny po celé budově.</p>
+      <p style="font-size:11px;letter-spacing:0.15em;color:var(--text-dim);margin-top:8px;text-align:center;" data-lang="en">Look for this pattern — tags are placed throughout the building.</p>
     </div>
 
     <div style="text-align: center; margin-top: 40px;">
