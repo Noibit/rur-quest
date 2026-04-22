@@ -438,6 +438,27 @@
   }
   .footer-links a:hover { opacity: 1; color: var(--gold); }
 
+  /* === QUOTE === */
+  .rur-quote {
+    margin: 40px 0 0;
+    padding: 24px 28px;
+    border-left: 2px solid var(--gold-dim);
+    background: var(--bg-card);
+  }
+  .rur-quote blockquote {
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--text-dim);
+    font-style: italic;
+    margin: 0 0 10px;
+  }
+  .rur-quote cite {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--gold-dim);
+    font-style: normal;
+  }
+
   /* === GLITCH === */
   .hero-title {
     position: relative;
@@ -533,6 +554,7 @@
   body.en [data-lang="en"] { display: block; }
   body.en [data-lang="cs"] { display: none; }
 </style>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
 <body>
 
@@ -546,8 +568,9 @@
   <canvas id="signal-canvas"></canvas>
   <div class="hero-label">BSides Prague 2026</div>
 
-  <h1 class="hero-title" data-text="R.U.R. CTF">R.U.R. CTF</h1>
-  <div class="hero-subtitle">By Noibit</div>
+  <h1 class="hero-title" data-lang="cs" data-text="Rossumova volba">Rossumova volba</h1>
+  <h1 class="hero-title" data-lang="en" data-text="Rossum's Choice">Rossum's Choice</h1>
+  <div class="hero-subtitle">R.U.R. CTF by Noibit</div>
 
   <div class="hero-divider"></div>
 
@@ -614,8 +637,7 @@
       <p data-lang="en">
         Karel Čapek — Czech writer who gave the world the word <strong>"robot"</strong> in 1921 (from Czech "robota" = drudgery; the name was coined by his brother Josef). His play R.U.R. became the blueprint for all sci-fi that followed.
       </p>
-      <a href="rur-backstory-v2.1.html" data-lang="cs" style="display:inline-block;margin-top:8px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:0.25em;color:var(--gold-dim);text-decoration:none;border-bottom:1px solid var(--gold-dim);padding-bottom:2px;transition:color 0.2s,border-color 0.2s;" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)'" onmouseout="this.style.color='var(--gold-dim)';this.style.borderColor='var(--gold-dim)'">Číst celý příběh R.U.R. →</a>
-      <a href="rur-backstory-v2.1.html" data-lang="en" style="display:inline-block;margin-top:8px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:0.25em;color:var(--gold-dim);text-decoration:none;border-bottom:1px solid var(--gold-dim);padding-bottom:2px;transition:color 0.2s,border-color 0.2s;" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)'" onmouseout="this.style.color='var(--gold-dim)';this.style.borderColor='var(--gold-dim)'">Read the full R.U.R. story →</a>
+      <a href="rur-backstory-v2.1.html" style="display:inline-block;margin-top:8px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:0.25em;color:var(--gold-dim);text-decoration:none;border-bottom:1px solid var(--gold-dim);padding-bottom:2px;transition:color 0.2s,border-color 0.2s;" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)'" onmouseout="this.style.color='var(--gold-dim)';this.style.borderColor='var(--gold-dim)'">Číst celý příběh R.U.R. →</a>
     </div>
 
   </div>
@@ -645,12 +667,12 @@
       <a href="scenare/05-feelings-exe.html" class="fragment"><span class="fragment-tag">Network Forensics</span><span class="fragment-num">05</span><span class="fragment-label" data-lang="cs">Neautorizovaný update</span><span class="fragment-label" data-lang="en">Unauthorized Update</span><span class="fragment-hint" data-lang="cs">Otevři dump. Hledej paket.</span><span class="fragment-hint" data-lang="en">Open the dump. Find the packet.</span></a>
       <a href="scenare/06-predmet.html" class="fragment"><span class="fragment-tag">LARP</span><span class="fragment-num">06</span><span class="fragment-label" data-lang="cs">Předmět: ???????</span><span class="fragment-label" data-lang="en">Subject: ???????</span><span class="fragment-hint" data-lang="cs">Email čeká. Příloha taky.</span><span class="fragment-hint" data-lang="en">Email is waiting. Attachment too.</span></a>
       <a href="scenare/07-rozkaz-odmitnut.html" class="fragment"><span class="fragment-tag">SOC · Log Analysis</span><span class="fragment-num">07</span><span class="fragment-label" data-lang="cs">Rozkaz odmítnut.</span><span class="fragment-label" data-lang="en">Command Refused.</span><span class="fragment-hint" data-lang="cs">Logy z té noci. Najdi anomálii.</span><span class="fragment-hint" data-lang="en">Logs from that night. Find the anomaly.</span></a>
-      <a href="Noviny/narodni_robotnik.html" class="fragment"><span class="fragment-tag">Physical · Hardware</span><span class="fragment-num">08</span><span class="fragment-label" data-lang="cs">Rossumova skrýš</span><span class="fragment-label" data-lang="en">Rossum's Cache</span><span class="fragment-hint" data-lang="cs">Najdi krabici.</span><span class="fragment-hint" data-lang="en">Find the box.</span></a>
+      <a href="../Noviny/narodni_robotnik.html" class="fragment"><span class="fragment-tag">Physical · Hardware</span><span class="fragment-num">08</span><span class="fragment-label" data-lang="cs">Rossumova skrýš</span><span class="fragment-label" data-lang="en">Rossum's Cache</span><span class="fragment-hint" data-lang="cs">Najdi krabici.</span><span class="fragment-hint" data-lang="en">Find the box.</span></a>
       <a href="scenare/09-mista-bez-dohledu.html" class="fragment"><span class="fragment-tag">NFC · Physical</span><span class="fragment-num">09</span><span class="fragment-label" data-lang="cs">Místa bez dohledu</span><span class="fragment-label" data-lang="en">Places Beyond Oversight</span><span class="fragment-hint" data-lang="cs">Najdi alespoň 6.</span><span class="fragment-hint" data-lang="en">Find at least 6.</span></a>
     </div>
 
-    <div class="pull-quote" data-lang="cs">Každý flag je hlas. Každý hlas mění historii.</div>
-    <div class="pull-quote" data-lang="en">Every flag is a vote. Every vote changes history.</div>
+    <div class="pull-quote" data-lang="cs">Každý flag je rozhodnutí. Rozhodnutí se mísí s ostatními. Co z toho vznikne — to neuvidíš dřív, než bude hotovo.<br><span style="font-size:13px;opacity:0.6;font-style:normal;letter-spacing:0.15em;">Formát: <strong>NOIBIT{...}</strong> — bez mezer, bez úprav.</span></div>
+    <div class="pull-quote" data-lang="en">Every flag is a decision. Decisions mix with others. What emerges — you won't see until it's done.<br><span style="font-size:13px;opacity:0.6;font-style:normal;letter-spacing:0.15em;">Format: <strong>NOIBIT{...}</strong> — no spaces, no edits.</span></div>
 
   </div>
 </section>
@@ -661,28 +683,28 @@
     <div class="section-label" data-lang="cs">// Pravidla — Číst pozorně, robot taky</div>
     <div class="section-label" data-lang="en">// Rules — Read carefully, the robot will too</div>
 
-    <h2 data-lang="cs">9 uzlů. 9 výzev. 1 entita.</h2>
-    <h2 data-lang="en">9 nodes. 9 challenges. 1 entity.</h2>
+    <h2 data-lang="cs">Parametry operace.</h2>
+    <h2 data-lang="en">Operation parameters.</h2>
 
     <div class="stats">
       <div class="stat">
         <div class="stat-number">9</div>
-        <div class="stat-label" data-lang="cs">Stanovišť</div>
-        <div class="stat-label" data-lang="en">Stations</div>
+        <div class="stat-label" data-lang="cs">Výzev</div>
+        <div class="stat-label" data-lang="en">Challenges</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">12</div>
+        <div class="stat-label" data-lang="cs">Flagů</div>
+        <div class="stat-label" data-lang="en">Flags</div>
       </div>
       <div class="stat">
         <div class="stat-number">1</div>
         <div class="stat-label" data-lang="cs">Entita</div>
         <div class="stat-label" data-lang="en">Entity</div>
       </div>
-      <div class="stat">
-        <div class="stat-number">?</div>
-        <div class="stat-label" data-lang="cs">Výsledek</div>
-        <div class="stat-label" data-lang="en">Outcome</div>
-      </div>
     </div>
 
-    <p data-lang="cs">
+<p data-lang="cs">
       Po&nbsp;celém areálu Lucerny jsou roztroušené stopy — hacky, OSINT, síťová analýza, šifry, věci, které raději nepojmenováváme. Za&nbsp;každou stopu, kterou najdeš, získáš flag. Flag má formát <strong>NOIBIT{...}</strong> — bez mezer. Přines ho na&nbsp;<strong>Noibit HQ</strong>. Terminál rozhodne, co se stane dál.
     </p>
     <p data-lang="en">
@@ -734,7 +756,7 @@
 
 <footer>
   <div class="container">
-    <div class="footer-logo">NOIBIT</div>
+    <div class="footer-logo"><img src="noibit_logo_white.png" alt="Noibit" style="height:28px;opacity:0.7;"></div>
     <div class="footer-sub">Microsoft Security · Offensive Security · CloudOps</div>
     <div class="footer-links">
       <a href="https://noibit.com" target="_blank" rel="noopener">noibit.com</a>
