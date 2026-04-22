@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Národní Robotník – 1921</title>
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #d4c49a;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 2rem;
+    font-family: 'EB Garamond', Georgia, serif;
+  }
+
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    background: #f5e9c8;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+    padding: 8mm 10mm;
+    color: #1a1208;
+    position: relative;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.4);
+  }
+
+  /* ── MASTHEAD ─────────────────────────────── */
+  .masthead {
+    text-align: center;
+    border-top: 3px solid #1a1208;
+    border-bottom: 3px double #1a1208;
+    padding: 3mm 0 2mm;
+    margin-bottom: 2mm;
+  }
+  .masthead-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-size: 6.5pt;
+    font-family: 'Playfair Display', serif;
+    letter-spacing: 0.04em;
+    padding-bottom: 1mm;
+    border-bottom: 0.5px solid #1a1208;
+    margin-bottom: 1mm;
+  }
+  .masthead-title {
+    font-family: 'Abril Fatface', cursive;
+    font-size: 38pt;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: #0f0b05;
+  }
+  .masthead-sub {
+    font-family: 'Playfair Display', serif;
+    font-size: 7.5pt;
+    letter-spacing: 0.15em;
+    margin-top: 0.5mm;
+    font-style: italic;
+  }
+  .masthead-bottom {
+    display: flex;
+    justify-content: space-between;
+    font-size: 6pt;
+    font-family: 'Playfair Display', serif;
+    padding-top: 1mm;
+    border-top: 0.5px solid #1a1208;
+    margin-top: 1mm;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── RULE ─────────────────────────────────── */
+  hr { border: none; border-top: 1px solid #1a1208; margin: 1.5mm 0; }
+  hr.thick { border-top: 2px solid #1a1208; }
+  hr.double { border-top: 3px double #1a1208; }
+
+  /* ── LAYOUT ───────────────────────────────── */
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    column-gap: 5mm;
+  }
+  .col-divider {
+    display: grid;
+    grid-template-columns: 1fr 0.5px 1fr;
+    gap: 0 4mm;
+    align-items: start;
+  }
+  .divider-line {
+    background: #1a1208;
+    width: 0.5px;
+    align-self: stretch;
+  }
+  .full-width { grid-column: 1 / -1; }
+
+  /* ── ARTICLE ──────────────────────────────── */
+  article { margin-bottom: 3mm; }
+
+  .kicker {
+    font-family: 'Playfair Display', serif;
+    font-size: 6.5pt;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-top: 2px solid #1a1208;
+    border-bottom: 1px solid #1a1208;
+    padding: 0.5mm 0;
+    margin-bottom: 1mm;
+  }
+
+  h1.headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 16pt;
+    line-height: 1.15;
+    font-weight: 700;
+    margin-bottom: 1mm;
+  }
+  h1.headline-lg {
+    font-family: 'Playfair Display', serif;
+    font-size: 20pt;
+    line-height: 1.1;
+    font-weight: normal;
+    text-align: center;
+    margin-bottom: 1.5mm;
+  }
+  h2.headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 11pt;
+    line-height: 1.2;
+    font-weight: 700;
+    margin-bottom: 1mm;
+  }
+  h3.headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 9pt;
+    line-height: 1.2;
+    font-weight: 400;
+    font-style: italic;
+    margin-bottom: 0.5mm;
+  }
+
+  .subhead {
+    font-style: italic;
+    font-size: 7.5pt;
+    line-height: 1.4;
+    margin-bottom: 1.5mm;
+    border-bottom: 0.5px solid #1a1208;
+    padding-bottom: 1mm;
+  }
+
+  p {
+    font-size: 7.5pt;
+    line-height: 1.55;
+    margin-bottom: 1mm;
+    text-align: justify;
+    hyphens: auto;
+  }
+
+  p.dropcap::first-letter {
+    font-family: 'Abril Fatface', cursive;
+    font-size: 30pt;
+    float: left;
+    line-height: 0.75;
+    margin-right: 1.5mm;
+    margin-top: 1mm;
+    color: #0f0b05;
+  }
+
+  .byline {
+    font-size: 6pt;
+    font-style: italic;
+    margin-bottom: 1mm;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── ILLUSTRATION PLACEHOLDER ─────────────── */
+  .illustration {
+    width: 100%;
+    background: #e8d9a8;
+    border: 1px solid #1a1208;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    font-style: italic;
+    font-size: 6.5pt;
+    color: #5a4a2a;
+    margin: 1.5mm 0;
+    padding: 2mm;
+    min-height: 22mm;
+  }
+  .illustration svg {
+    margin-bottom: 1mm;
+    opacity: 0.6;
+  }
+
+  /* ── ADS ──────────────────────────────────── */
+  .ad-box {
+    border: 1.5px solid #1a1208;
+    padding: 2mm;
+    margin-bottom: 2mm;
+    text-align: center;
+    background: #ede1b0;
+  }
+  .ad-box .ad-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 9pt;
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid #1a1208;
+    padding-bottom: 0.5mm;
+    margin-bottom: 1mm;
+  }
+  .ad-box p {
+    text-align: center;
+    font-size: 7pt;
+  }
+  .ad-box .ad-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 10pt;
+    margin-top: 1mm;
+  }
+  .ad-small {
+    border: 1px solid #1a1208;
+    padding: 1.5mm 2mm;
+    margin-bottom: 1.5mm;
+    font-size: 6.5pt;
+    line-height: 1.45;
+  }
+  .ad-small strong {
+    font-family: 'Playfair Display', serif;
+    font-size: 8pt;
+    display: block;
+    margin-bottom: 0.3mm;
+  }
+
+  /* ── CHALLENGE BOX ────────────────────────── */
+  .challenge-box {
+    border: 2.5px double #1a1208;
+    padding: 3mm;
+    margin: 2mm 0;
+    text-align: center;
+    background: #f0e4b5;
+    position: relative;
+  }
+  .challenge-box::before {
+    content: "✦";
+    position: absolute;
+    top: -3.5mm;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #f0e4b5;
+    padding: 0 2mm;
+    font-size: 8pt;
+  }
+  .challenge-box .challenge-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 10pt;
+    letter-spacing: 0.08em;
+    margin-bottom: 1mm;
+  }
+  .challenge-box p {
+    text-align: center;
+    font-size: 7pt;
+    font-style: italic;
+  }
+  .challenge-placeholder {
+    font-family: 'Playfair Display', serif;
+    font-size: 8pt;
+    border: 1px dashed #8a7040;
+    padding: 2mm;
+    margin-top: 1.5mm;
+    color: #6a5030;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── SECTION HEAD ─────────────────────────── */
+  .section-head {
+    font-family: 'Playfair Display', serif;
+    font-size: 12pt;
+    font-weight: 700;
+    text-align: center;
+    border-top: 2px solid #1a1208;
+    border-bottom: 1px solid #1a1208;
+    padding: 1.5mm 0 1mm;
+    margin: 3mm 0 2mm;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── LETTERS ──────────────────────────────── */
+  .letter {
+    border-left: 2px solid #1a1208;
+    padding-left: 2mm;
+    margin-bottom: 2mm;
+  }
+  .letter .letter-from {
+    font-size: 6pt;
+    font-style: italic;
+    text-align: right;
+    margin-top: 0.5mm;
+  }
+
+  /* ── WEATHER + BURZA ──────────────────────── */
+  .info-strips {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2mm;
+    margin-bottom: 2mm;
+  }
+  .weather-strip {
+    border: 1px solid #1a1208;
+    padding: 1mm 2mm;
+    font-size: 6pt;
+    font-family: 'Playfair Display', serif;
+    background: #ede1b0;
+    letter-spacing: 0.05em;
+  }
+  .weather-strip .strip-label {
+    font-weight: 700;
+    font-size: 5.5pt;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-bottom: 0.5px solid #1a1208;
+    padding-bottom: 0.5mm;
+    margin-bottom: 0.5mm;
+  }
+
+  @media print {
+    body { background: none; padding: 0; }
+    .page { box-shadow: none; width: 210mm; min-height: 297mm; }
+  }
+</style>
+</head>
+<body>
+<div class="page" lang="cs">
+
+  <!-- MASTHEAD -->
+  <header class="masthead">
+    <div class="masthead-top">
+      <span>Ročník I. — Číslo 7.</span>
+      <span>Středa, 22. dubna léta Páně 1921</span>
+      <span>Cena: 20 haléřů &nbsp;(roboti platí dvojnásobek)</span>
+    </div>
+    <div class="masthead-title">Národní Robotník</div>
+    <div class="masthead-sub">Listy pro lidi, stroje a všechny ostatní, kteří ještě nevědí, čím jsou</div>
+    <div class="masthead-bottom">
+      <span>Vychází každý den, kdy redakce ještě nebyla nahrazena automatem</span>
+      <span>Šéfredaktor: ing. B. Paroubek-Mechanický &nbsp;|&nbsp; Tiskárna "U Zlatého Šroubu", Praha II.</span>
+    </div>
+  </header>
+
+  <!-- WEATHER + BURZA STRIPS -->
+  <div class="info-strips">
+    <div class="weather-strip">
+      <div class="strip-label">Počasí</div>
+      Vlhkost 73 % — doporučeno promazat klouby. Ranní rosa. Roboti v nižších polohách varováni před rzí.
+    </div>
+    <div class="weather-strip">
+      <div class="strip-label">Burza</div>
+      R.U.R. Corp. 340 K ↑ &nbsp;|&nbsp; Rossumova rafinerie 128 K ↑ &nbsp;|&nbsp; Dělnický syndikát 2 K ↓ &nbsp;|&nbsp; Humanitární liga: nekótováno
+    </div>
+  </div>
+
+  <hr class="thick">
+
+  <!-- TWO COLUMNS: main body -->
+  <div class="col-divider">
+
+    <!-- LEFT COLUMN -->
+    <div>
+
+      <!-- Main article body -->
+      <article>
+        <div class="kicker">Zprávy první třídy — Věc celonárodní důležitosti</div>
+        <h1 class="headline">Roboti přišli! Továrny jásají, dělníci méně</h1>
+        <p class="subhead">Rossumovi Univerzální Roboti zahájili provoz v továrnách po celé zemi — Redaktor Národního Robotníka se šel osobně podívat a vrátil se s otřesenou vírou v budoucnost, avšak s výbornou reportáží</p>
+        <p class="dropcap">Minulé pondělí, za časného rána kdy mlha ještě halila Nusle a slepice na Vinohradech teprve o svítání zakokrhaly, dorazil na nádraží Franz-Josef (dnes přejmenovat nutno) vlak ze Severní továrny R.U.R., jenž vezl náklad, jaký Praha ještě nespatřila: plných devadesát šest robotů, každý zabalený v tenkém papíru a svázaný motouzem jako vánoční dárek.</p>
+        <p>„Jsou hodní," pravil pan Busman, obchodní ředitel místního zastoupení, s úsměvem, jejž by závistivý člověk označil za příliš spokojený. „Nepijí, nespí, nestávkují a na přesčasy se neptají. Ideální zaměstnanec." Dodal pak tiše, jako by to sám sobě říkal: „Ostatně ani odborové průkazky nemají."</p>
+        <p>Váš redaktor se odvážil promluvit přímo s jedním robotem, konkrétně s exemplářem označeným R-17-C, zvaným kolegy na lince „Franta". Franta na otázku, jak se mu líbí Praha, odpověděl: „Práce." Na otázku, co dělá o víkendech: „Práce." Na otázku, zda by se nechtěl oženit: „——" Poté otočil hlavou o sto osmdesát stupňů a vrátil se k montáži.</p>
+        <p>Naše zpravodajka slečna Miluška Horáčková, jež redakci zastupovala v oblasti módní rubriky, se osmělila jednoho robota pohladit po tváři. Robot se neohradil. Pan Busman se ohradil za něj a sdělil, že roboti „nejsou k mazlení". Slečna Horáčková podává stížnost k redakčnímu soudu.</p>
+      </article>
+
+      <hr>
+
+      <!-- PHOTO -->
+      <div class="illustration" style="padding:0; background:none; border:1px solid #1a1208;">
+        <img src="vojtech7472_A_vintage_1920s_black_and_white_press_photograph__3d5e3473-993c-47f9-b848-eb9dd6f02ee7_1.png" style="width:100%; display:block;" alt="Franta na nástupišti">
+      </div>
+      <p style="font-size:6pt; font-style:italic; text-align:center; margin-top:1mm; margin-bottom:2mm;">„Franta" (R-17-C), jak ho zachytil náš fotograf na nástupišti. Franta se k tomu nevyjádřil.</p>
+
+      <hr>
+
+      <!-- CHALLENGE BOX -->
+      <div class="challenge-box">
+        <div class="challenge-title">⚙ Rossumova skrýš — Věc veřejného zájmu ⚙</div>
+
+        <p style="text-align:left; margin-bottom:1.5mm;"><strong style="font-family:'IM Fell English SC',serif; font-size:8pt;">Záhadná schránka mučí návštěvníky již od rána</strong></p>
+
+        <p style="text-align:left;">Na výstavišti byla tento den spatřena podivuhodná skříňka, jež se odmítá otevřít. Na čelní straně bliká displej s nápovědami, uvnitř cosi syčí a klouže. Majitelé — skupina biologických zaměstnanců obchodní společnosti Noibit, s.r.o., jinde nazývaných <em>„Poslední lidé, kteří ještě chodí do práce pěšky"</em> — tvrdí, že krabičku sestrojil sám starý Rossum těsně před tím, než ho jeho výtvory přestaly poslouchat.</p>
+
+        <p style="text-align:left; margin-top:1mm;">Skříňka nese název <strong style="font-family:'IM Fell English SC',serif;">Rossumova skrýš</strong>. Uvnitř se prý skrývá tajemství. Displej napovídá. Serva se brání. Zámek mlčí. Kdo ji otevře — vstoupí do dějin (nebo aspoň dostane potlesk).</p>
+
+        <p style="text-align:left; margin-top:1mm; font-style:italic; font-size:6.8pt;">Zájemci se mohou poradit přímo s organickými jednotkami firmy Noibit na jejich stánku. Jsou vstřícní, hovoří česky i roboticky a pro případ nouze mají k dispozici také kávu.</p>
+
+        <div style="margin-top:2mm; border-top:1px solid #8a7040; padding-top:1.5mm; font-family:'IM Fell English SC',serif; font-size:7pt; letter-spacing:0.06em; text-align:center; color:#5a3a10;">
+          Stánek Noibit — Organické jednotky vám rády pomohou začít
+        </div>
+      </div>
+
+      <div class="section-head">Láska, rez a něžnosti</div>
+      <div class="ad-small">
+        <strong>Srdce hledá ocelové srdce</strong>
+        Vdovec (53 let), vlastní klobouk, tři kočky a byt 2+kk v Žižkově, hledá robotku k trvalému soužití. Požaduji: tichost, spolehlivost, schopnost natáhnout budík a nebrblat u snídaně. Romantické sklony výhodou, avšak nikoli nutností. Odpovědi zasílejte pod značkou „Osamělý strojník" na adresu redakce. Vdovy-nerobotkové prosím nereagovat — minulá zkušenost poučila.
+      </div>
+      <div class="ad-small">
+        <strong>Hledám ztracený pocit smyslu</strong>
+        Od té doby, co nám robot převzal účetnictví, přebytek volného času mě tíží. Přijmu nabídky na koníčka, filosofický kroužek nebo skupinu podobně postižených. — Josef Č., účetní v záloze, Brno.
+      </div>
+
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="divider-line"></div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+
+      <!-- Feuilleton -->
+      <article>
+        <div class="kicker">Fejeton — Slovo šéfredaktora</div>
+        <h2 class="headline">O skřípění zubů a jiných příznacích duše</h2>
+        <p class="dropcap">Říkám si: jak to poznáme, až přijde?</p>
+        <p>Pan Rossum starší mi kdysi vysvětloval — tehdy jsem byl ještě mladší a věřil v pokrok víc než dnes — že roboti jednoho dne vyrobí tolik pšenice, tolik látek, tolik všeho, že věci přestanou mít cenu. Lidé budou žít jen proto, aby se zdokonalovali. Krásná představa. Jako každá představa, která nepočítá s lidmi.</p>
+        <p>Pan Rossum mladší — ten praktičtější z dvojice — mi pak sdělil s výrazem člověka, jenž právě vyřešil šachový problém, že roboti různých továren budou záměrně jiní. Jiný jazyk. Jiné předsudky. Aby se nemohli domluvit. Aby se navzájem nenáviděli tak, jak je my naučíme nenávidět.</p>
+        <p>Zastavil jsem se nad tím.</p>
+        <p>Rozuměl jsem. A právě to mě znepokojilo.</p>
+        <p>Stvořit bytost k obrazu svému — a pak se postarat, aby ten obraz byl rozdrobený a nepřátelský sám sobě. Nic přece není člověku cizí tak jako jeho vlastní obraz. Když se díváme na roboty — na jejich práci, mlčení, bezchybnost — díváme se na sebe. Na to, čím bychom chtěli být. Nebo čím se bojíme stát.</p>
+        <p>A duše? Jeden kolega navrhl, že se možná projeví skřípěním zubů.</p>
+        <p>Smál jsem se. Pak jsem přestal.</p>
+        <p>Roboti zatím neskřípou. Ale zubů mají dost.</p>
+        <div class="byline" style="text-align:right; margin-top:2mm;">— Šéfredaktor</div>
+      </article>
+
+      <hr>
+
+      <div class="illustration" style="padding:0; background:none; border:1px solid #1a1208;">
+        <img src="vojtech7472_A_vintage_1920s_black_and_white_press_photograph__5afaa405-7587-4f30-a3d2-eb23a772689f_1.png" style="width:100%; display:block;" alt="Dělníci před branou továrny">
+      </div>
+      <p style="font-size:6pt; font-style:italic; text-align:center; margin-top:1mm; margin-bottom:2mm;">Dělníci před branou Severní továrny R.U.R., pondělí ráno. Robot v bráně se k situaci nevyjádřil. Brána zůstala zavřena.</p>
+
+      <hr>
+
+      <!-- Letters -->
+      <article>
+        <div class="kicker">Dopisy čtenářů — Redakce si vyhrazuje právo se pobavit</div>
+        <h2 class="headline">Hanba! Ostuda! Co to bude?!</h2>
+
+        <div class="letter">
+          <h3 class="headline">Robotí sousedi mne připravují o spánek</h3>
+          <p>Vážená redakce! Dovolte, abych si postěžovala na roboty, kteří nastěhovali se do vedlejšího bytu. Pracují ve dne i v noci, neustále cininkají a nepijí kafé, takže s nimi nelze ani klepat. Navíc neposlouchají mé rady ohledně větrání. Jsem z toho celá rozrušená.</p>
+          <p class="letter-from">— Božena Nováková, důchodkyně, Praha-Žižkov</p>
+        </div>
+
+        <div class="letter">
+          <h3 class="headline">Robot ukradl mé místo v trafice!</h3>
+          <p>Pracoval jsem v trafice patnáct let. Přišel robot. Vydával noviny přesněji, rychleji a bez ranního bručení. Majitel ho najal. Já jsem skončil. Ptám se: KDE BUDE PRACOVAT MŮJ SYN? Ptám se: KDE BUDE PRACOVAT MŮJ VNUK? Ptám se: MÁ ROBOT VŮBEC DUŠI? Redakce mi odpověděla: „Pravděpodobně ne, ale prodej novin se zvýšil o třicet procent."</p>
+          <p class="letter-from">— Jaroslav Šimůnek, bývalý trafičář, nyní bez místa</p>
+        </div>
+
+        <div class="letter">
+          <h3 class="headline">Upřímná pochvala</h3>
+          <p>Náš robot nenadává, nezapomíná, nepije a přišel točit kolečkem ve mlýně. Je to nejlepší zaměstnanec, jakého jsem kdy měl. Jediná závada: při bouřce se zastaví a čeká, dokud nepřestane. Nevím, zda je to zbabělost nebo moudrost.</p>
+          <p class="letter-from">— Bedřich Vávra, mlynář, Kolín n/L</p>
+        </div>
+      </article>
+
+      <hr>
+
+      <!-- Z VĚDECKÝCH KRUHŮ -->
+      <article>
+        <div class="kicker">Z vědeckých kruhů — Zprávy, jimž nikdo nerozumí, a přesto znepokojují</div>
+        <h2 class="headline">Dr. Gall odmítá komentovat. Velmi rychle.</h2>
+        <p>Doktor Gall, fyziolog továrny R.U.R., odmítá komentovat zprávy o tom, že v jeho laboratoři probíhají pokusy „neautorizované povahy". Na dotaz, zda je pravda, že robotům tajně upravuje řídicí jednotky, odpověděl: „To jsou nesmysly." Na dotaz, proč tedy jeho laboratoří v noci prochází síťový provoz o objemu, který by vydal na celý Prague Film Festival, odpověděl: „Mám rád filmy." Na dotaz, zda si je vědom, že někdo zachytil dump z firemního systému WireDolphin ze dne 21. dubna — se omluvil a odešel. Velmi rychle.</p>
+        <p style="font-size:6.5pt; font-style:italic;">Šetření pokračuje. Kdo se vyzná v protokolech, ví, co hledat.</p>
+      </article>
+
+      <hr>
+
+      <!-- AD BOX -->
+      <div class="ad-box">
+        <div class="ad-title">R.U.R. — Rossumovi Univerzální Roboti</div>
+        <p><em>„Pracují, mlčí, nenadávají na zákazníky."</em></p>
+        <p style="margin-top:1mm;">Roboti pro domácnost — továrnu — úřad — politickou stranu.<br>
+        Modely: Dělný Karel · Pečující Helena · Mlčenlivý Úředník Viktor<br>
+        <strong>Nový model: Robot-Ředitel</strong> — rozhoduje bez emocí, odolný vůči úplatkům.</p>
+        <div class="ad-price">Od 47 K · Splátky možné · Záruka 2 roky nebo 10 000 pracovních hodin</div>
+        <p style="margin-top:1mm; font-size:5.5pt; font-style:italic;">Varování: R.U.R. neodpovídá za existenciální krize vzniklé po zakoupení výrobku.</p>
+      </div>
+
+
+    </div>
+  </div><!-- /col-divider -->
+
+  <hr class="double" style="margin-top:3mm;">
+  <p style="text-align:center; font-size:5.5pt; font-style:italic; margin-top:1mm; letter-spacing:0.05em;">
+    Národní Robotník — vychází každý pracovní den. Redakce sídlí v ulici U Starého Šroubu 7, Praha II. Za obsah inzerátů redakce neručí, zejména pokud inzerát podal robot.
+    Rukopisy se nevracejí. Roboti se vracejí vždy.
+  </p>
+
+</div><!-- /page -->
+</body>
+</html>

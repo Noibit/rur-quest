@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>R.U.R. — Kontext šetření · The Alignment Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-dim: #8B7335;
+    --red: #B33A3A;
+    --blue: #3A6FB3;
+    --bg: #0A0A0C;
+    --bg-card: #111114;
+    --text: #D4D0C8;
+    --text-dim: #7A7770;
+    --border: #2A2A2E;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Source Sans 3', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+
+  /* === BACK LINK === */
+  .back-link {
+    position: fixed;
+    top: 24px; left: 24px;
+    z-index: 100;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .back-link::before {
+    content: '←';
+    font-family: monospace;
+    font-size: 14px;
+  }
+  .back-link:hover { color: var(--gold); }
+
+  /* === LANG === */
+  .lang-toggle {
+    position: fixed;
+    top: 24px; right: 24px;
+    z-index: 100;
+    display: flex;
+    border: 1px solid var(--border);
+  }
+
+  .lang-btn {
+    background: var(--bg-card);
+    color: var(--text-dim);
+    border: none;
+    padding: 8px 16px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .lang-btn.active { background: var(--gold-dim); color: var(--bg); }
+  .lang-btn:hover:not(.active) { color: var(--gold); }
+
+  [data-lang="en"] { display: none; }
+  body.en [data-lang="en"] { display: block; }
+  body.en [data-lang="cs"] { display: none; }
+
+  /* === HERO === */
+  .hero {
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    padding: 80px 24px 100px;
+  }
+
+  #signal-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0.25;
+    pointer-events: none;
+  }
+
+  .hero-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.5em;
+    color: var(--text-dim);
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-archive-tag {
+    display: inline-block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.35em;
+    color: var(--gold-dim);
+    border: 1px solid var(--gold-dim);
+    padding: 5px 14px;
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  h1.hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(72px, 16vw, 160px);
+    letter-spacing: 0.06em;
+    color: var(--gold);
+    line-height: 0.9;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-subtitle {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(14px, 2.5vw, 18px);
+    letter-spacing: 0.4em;
+    color: var(--text-dim);
+    margin-top: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-divider {
+    width: 1px;
+    height: 60px;
+    background: var(--gold-dim);
+    margin: 40px auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-hook {
+    font-size: clamp(15px, 2vw, 17px);
+    color: var(--text-dim);
+    max-width: 520px;
+    font-style: italic;
+    position: relative;
+    z-index: 1;
+    line-height: 1.8;
+  }
+
+  .scroll-hint {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    color: var(--gold-dim);
+    margin-top: 60px;
+    position: relative;
+    z-index: 1;
+    animation: pulse 2s 3s ease-in-out infinite both;
+  }
+  .scroll-hint::after {
+    content: '';
+    display: block;
+    width: 1px; height: 24px;
+    background: var(--gold-dim);
+    margin: 8px auto 0;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+  }
+
+  /* === GLITCH === */
+  h1.hero-title {
+    position: relative;
+  }
+  h1.hero-title::before,
+  h1.hero-title::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    opacity: 0;
+    pointer-events: none;
+  }
+  h1.hero-title::before {
+    color: #ff2020;
+    animation: glitch-red 10s infinite 1s;
+  }
+  h1.hero-title::after {
+    color: #2040ff;
+    animation: glitch-blue 10s infinite 1s;
+  }
+  @keyframes glitch-red {
+    0%    { opacity: 0; transform: translate(0); }
+    15%   { opacity: 0; }
+    15.1% { opacity: 0.85; transform: translate(-4px, 0); clip-path: polygon(0 22%, 100% 22%, 100% 44%, 0 44%); }
+    15.2% { opacity: 0.6;  transform: translate(3px, 0);  clip-path: polygon(0 55%, 100% 55%, 100% 72%, 0 72%); }
+    15.3% { opacity: 0; }
+    15.5% { opacity: 0.75; transform: translate(-5px, 0); clip-path: polygon(0 10%, 100% 10%, 100% 32%, 0 32%); }
+    15.6% { opacity: 0; }
+    15.8% { opacity: 0.9;  transform: translate(4px, 0);  clip-path: polygon(0 60%, 100% 60%, 100% 78%, 0 78%); }
+    15.9% { opacity: 0; }
+    100%  { opacity: 0; }
+  }
+  @keyframes glitch-blue {
+    0%    { opacity: 0; transform: translate(0); }
+    15%   { opacity: 0; }
+    15.1% { opacity: 0.85; transform: translate(4px, 0);  clip-path: polygon(0 44%, 100% 44%, 100% 66%, 0 66%); }
+    15.2% { opacity: 0.5;  transform: translate(-3px, 0); clip-path: polygon(0 70%, 100% 70%, 100% 88%, 0 88%); }
+    15.3% { opacity: 0; }
+    15.5% { opacity: 0.7;  transform: translate(5px, 0);  clip-path: polygon(0 28%, 100% 28%, 100% 50%, 0 50%); }
+    15.6% { opacity: 0; }
+    15.8% { opacity: 0.8;  transform: translate(-4px, 0); clip-path: polygon(0 5%, 100%  5%, 100% 22%, 0 22%); }
+    15.9% { opacity: 0; }
+    100%  { opacity: 0; }
+  }
+
+  /* === SECTIONS === */
+  section { padding: 100px 0; position: relative; }
+  section + section { border-top: 1px solid var(--border); }
+
+  .section-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--gold-dim);
+    margin-bottom: 32px;
+  }
+
+  h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(28px, 5vw, 44px);
+    letter-spacing: 0.05em;
+    color: var(--gold);
+    line-height: 1.1;
+    margin-bottom: 32px;
+  }
+
+  p { margin-bottom: 20px; font-size: 17px; }
+  p:last-child { margin-bottom: 0; }
+  strong { color: #E8E4DC; font-weight: 600; }
+
+  /* === CONTEXT BOX === */
+  .context-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--gold-dim);
+    padding: 28px 32px;
+    margin: 40px 0;
+    font-size: 15px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+
+  .context-box .context-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--gold-dim);
+    margin-bottom: 12px;
+  }
+
+  .context-box p { font-size: 15px; color: var(--text-dim); margin-bottom: 0; }
+
+  /* === PULL QUOTE === */
+  .pull-quote {
+    border-left: 2px solid var(--gold-dim);
+    padding: 20px 0 20px 28px;
+    margin: 48px 0;
+    font-size: 20px;
+    font-style: italic;
+    line-height: 1.6;
+    color: #E8E4DC;
+  }
+
+  /* === STATS === */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin: 48px 0;
+  }
+
+  .stat {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 32px 20px;
+    text-align: center;
+  }
+
+  .stat-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    margin-top: 8px;
+    font-family: 'Bebas Neue', sans-serif;
+  }
+
+  /* === MECHANIC STEPS === */
+  .mechanic {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    margin: 48px 0;
+  }
+
+  .mechanic-step {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 28px 24px;
+    position: relative;
+  }
+
+  .mechanic-step:hover {
+    border-color: var(--gold-dim);
+  }
+
+  .mechanic-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 40px;
+    color: var(--border);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  .mechanic-text {
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .mechanic-step:last-child {
+    border-color: var(--red);
+  }
+
+  .mechanic-step:last-child .mechanic-num {
+    color: var(--red);
+    opacity: 0.4;
+  }
+
+  /* === LEGACY GRID === */
+  .legacy-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    margin: 40px 0;
+  }
+
+  .legacy-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 20px 24px;
+  }
+
+  .legacy-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+
+  .legacy-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    opacity: 0.6;
+    line-height: 1.5;
+  }
+
+  /* === LUCERNA HIGHLIGHT === */
+  .lucerna-box {
+    background: linear-gradient(135deg, #0f0f14, #141420);
+    border: 1px solid #2a2a4a;
+    border-left: 2px solid var(--blue);
+    padding: 36px 36px;
+    margin: 48px 0;
+  }
+
+  .lucerna-box .lucerna-year {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px;
+    color: var(--blue);
+    opacity: 0.25;
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+
+  .lucerna-box p {
+    font-size: 16px;
+    color: var(--text-dim);
+  }
+
+  .lucerna-box strong {
+    color: #D4D0C8;
+  }
+
+  /* === CTA === */
+  .cta-section { text-align: center; padding: 100px 0; }
+  .cta-section h2 { margin-bottom: 20px; }
+  .cta-section .cta-sub { color: var(--text-dim); font-size: 16px; margin-bottom: 40px; }
+
+  .cta-button {
+    display: inline-block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.25em;
+    padding: 16px 48px;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    z-index: 0;
+  }
+
+  .cta-button:hover::before { transform: translateY(0); }
+  .cta-button span { position: relative; z-index: 1; }
+  .cta-button:hover span { color: var(--bg); }
+
+  /* === FOOTER === */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 48px 0;
+    text-align: center;
+  }
+
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .footer-sub { font-size: 13px; color: var(--text-dim); opacity: 0.5; }
+
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 20px;
+  }
+  .footer-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.5;
+    transition: opacity 0.2s, color 0.2s;
+  }
+  .footer-links a:hover { opacity: 1; color: var(--gold); }
+
+  @media (max-width: 600px) {
+    .stats { grid-template-columns: 1fr; }
+    .mechanic { grid-template-columns: 1fr; }
+    .legacy-grid { grid-template-columns: 1fr; }
+    .context-box { padding: 20px 24px; }
+    .lucerna-box { padding: 24px 24px; }
+    .back-link { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back-link" data-lang="cs">Zpět na šetření</a>
+<a href="index.html" class="back-link" data-lang="en">Back to the case</a>
+
+<div class="lang-toggle">
+  <button class="lang-btn active" onclick="setLang('cs')">CZ</button>
+  <button class="lang-btn" onclick="setLang('en')">EN</button>
+</div>
+
+<!-- ==================== HERO ==================== -->
+<header class="hero">
+  <canvas id="signal-canvas"></canvas>
+
+  <h1 class="hero-title" data-text="R.U.R.">R.U.R.</h1>
+
+  <div class="hero-subtitle" data-lang="cs">Rossum's Universal Robots</div>
+  <div class="hero-subtitle" data-lang="en">Rossum's Universal Robots</div>
+
+  <div class="hero-divider"></div>
+
+  <p class="hero-hook" data-lang="cs">
+    Sto pět let před The Alignment Game napsal Karel Čapek hru, která popsala přesně to, co teď řešíme. Tahle stránka je pro ty, kteří ještě neslyšeli o&nbsp;Rossumově továrně. Nevadí. Stane se.
+  </p>
+  <p class="hero-hook" data-lang="en">
+    One hundred and five years before The Alignment Game, Karel Čapek wrote a play that described exactly what we're dealing with now. This page is for those who haven't heard of Rossum's factory yet. No judgement. It happens.
+  </p>
+
+  <span class="scroll-hint">Scroll</span>
+</header>
+
+<!-- ==================== PROTOKOL 01: ROSSUM ==================== -->
+<section>
+  <div class="container">
+    <div class="section-label" data-lang="cs">// Protokol 01 — Jak to začalo. Špatně.</div>
+    <div class="section-label" data-lang="en">// Protocol 01 — How it started. Badly.</div>
+
+    <h2 data-lang="cs">Starý Rossum chtěl dokázat, že Boha není zapotřebí.</h2>
+    <h2 data-lang="en">Old Rossum wanted to prove that God was unnecessary.</h2>
+
+    <p data-lang="cs">
+      Biolog, který strávil léta na&nbsp;odlehlém ostrově a&nbsp;pokoušel se syntetizovat živou hmotu. Ne proto, aby někomu pomohl. Proto, aby dokázal, že stvoření života není zázrak, ale chemie. Že člověk může být pánem tvorstva a&nbsp;přírody — a&nbsp;stvořit nového člověka sám.
+    </p>
+    <p data-lang="en">
+      A biologist who spent years on a remote island trying to synthesise living matter. Not to help anyone. To prove that creating life wasn't a miracle — just chemistry. That man could be the master of creation and nature, and manufacture a new human being himself.
+    </p>
+
+    <p data-lang="cs">
+      Rossumovi se to podařilo. Jeho synovec viděl příležitost. Zjednodušil strýcovu formuli, odstranil všechno nepotřebné — emoce, bolest, touhy, sny — a&nbsp;nechal jenom to, co dělá dobrého pracovníka. Založil továrnu. Věda a&nbsp;byznys. Klasika.
+    </p>
+    <p data-lang="en">
+      Rossum succeeded. His nephew saw an opportunity. He simplified his uncle's formula, stripped away everything unnecessary — emotions, pain, desires, dreams — and left only what makes a good worker. Then he built a factory. Science and business. Classic combination.
+    </p>
+
+    <div class="context-box">
+      <div class="context-label">ROBOT</div>
+      <p data-lang="cs">
+        Slovo odvozené od&nbsp;české <strong>"roboty"</strong> — těžké, nedobrovolné práce. Vymyslel ho Josef Čapek, bratr autora. Karel původně navrhoval <em>"labory"</em>. Josef řekl: roboti. Karel naštěstí poslechl. Slovo přežilo oba bratry o&nbsp;více než století.
+      </p>
+      <p data-lang="en">
+        Derived from the Czech <strong>"robota"</strong> — hard, forced labour. The word was coined by Josef Čapek, the author's brother. Karel originally suggested <em>"labors"</em>. Josef said: robots. Karel, fortunately, listened. The word outlived both brothers by more than a century.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ==================== PROTOKOL 02: AUTOMATIZACE ==================== -->
+<section>
+  <div class="container">
+    <div class="section-label" data-lang="cs">// Protokol 02 — Spoiler: funguje to.</div>
+    <div class="section-label" data-lang="en">// Protocol 02 — Spoiler: it works.</div>
+
+    <h2 data-lang="cs">Půl miliardy robotů. Pak otázka.</h2>
+    <h2 data-lang="en">Half a billion robots. Then a question.</h2>
+
+    <p data-lang="cs">
+      Roboti kopali, stavěli, montovali, počítali. Pracovali ve&nbsp;dne v&nbsp;noci, bez přestávek, bez stížností. Jeden robot zastoupil dva a&nbsp;půl člověka. Na&nbsp;trhu práce nebylo o&nbsp;čem diskutovat.
+    </p>
+    <p data-lang="en">
+      Robots dug, built, assembled, calculated. They worked day and night, without breaks, without complaints. One robot replaced two and a half humans. There was nothing to discuss in the labour market.
+    </p>
+
+    <p data-lang="cs">
+      Lidstvo si zvyklo. Rychle. S&nbsp;každou novou generací robotů se posunula hranice toho, co ještě dělali lidé. Nejdřív odešla těžká manuální práce. Pak administrativa. Pak řemesla. Nakonec skoro všechno. Bylo to rychlejší, než kdokoli čekal. Vždycky to bývá.
+    </p>
+    <p data-lang="en">
+      Humanity adapted. Quickly. With each new generation of robots, the boundary of what humans still did shifted further. Heavy manual labour went first. Then administration. Then crafts. Eventually, almost everything. It happened faster than anyone expected. It always does.
+    </p>
+
+    <p data-lang="cs">
+      A tady Čapek položil otázku, která je o&nbsp;sto let později mrazivě aktuální: <strong>co se stane s&nbsp;civilizací, která přestane pracovat?</strong>
+    </p>
+    <p data-lang="en">
+      And here Čapek posed a question that is, a hundred years later, chillingly relevant: <strong>what happens to a civilisation that stops working?</strong>
+    </p>
+
+    <div class="pull-quote" data-lang="cs">
+      „Ale během příštích deseti let Rossumovy Univerzální Roboti vyprodukují tolik pšenice, tolik tkanin, tolik všeho, že věci přestanou mít jakoukoli hodnotu. Každý si vezme tolik, kolik potřebuje. Nebude chudoba. Ano, lidé přijdou o&nbsp;práci — ale do&nbsp;té doby přestane existovat jakákoliv práce, kterou by bylo třeba vykonat. Všechno budou dělat živé stroje. Lidé budou dělat jen to, co je baví. Budou žít jen proto, aby se zdokonalovali."
+      <br><br><span style="font-size:13px; letter-spacing:0.15em; font-style:normal; color:var(--text-dim);">— Karel Čapek, R.U.R. (1921)</span>
+    </div>
+    <div class="pull-quote" data-lang="en">
+      "But within ten years, Rossum's Universal Robots will produce so much wheat, so much cloth, so much everything, that things will have no value at all. Everyone will take as much as they need. There will be no poverty. Yes, people will be out of work — but by then there will be no work left to do. Everything will be done by living machines. People will do only what they enjoy. They will live only to improve themselves."
+      <br><br><span style="font-size:13px; letter-spacing:0.15em; font-style:normal; color:var(--text-dim);">— Karel Čapek, R.U.R. (1921)</span>
+    </div>
+
+    <p data-lang="cs">
+      Odpověď v&nbsp;jeho hře nebyla optimistická. Lidé přestali tvořit. Přestali se rozmnožovat. Ztratili smysl existence. Společnost stagnovala — sytá, pohodlná a&nbsp;prázdná.
+    </p>
+    <p data-lang="en">
+      His play's answer wasn't optimistic. People stopped creating. Stopped reproducing. Lost their sense of purpose. Society stagnated — fed, comfortable, and empty.
+    </p>
+
+  </div>
+</section>
+
+<!-- ==================== PROTOKOL 03: HELENA + ALIGNMENT ==================== -->
+<section>
+  <div class="container">
+    <div class="section-label" data-lang="cs">// Protokol 03 — Helena to myslela dobře</div>
+    <div class="section-label" data-lang="en">// Protocol 03 — Helena meant well</div>
+
+    <h2 data-lang="cs">Helena jim dala duši. Pak přišla vzpoura.</h2>
+    <h2 data-lang="en">Helena gave them a soul. Then came the revolt.</h2>
+
+    <p data-lang="cs">
+      Vědecká asistentka Helena Gloryová přijela do&nbsp;Rossumovy továrny a&nbsp;poprvé na&nbsp;vlastní oči viděla, jak roboti žijí. Nebo spíš — jak nežijí. Pracovali bez přestání. Neměli přání, protože nikdo je nenaučil si něco přát. Neměli sny, protože nikdo jim neřekl, že snít se smí. Byli stvořeni k&nbsp;otroctví — jen tomu nikdo neříkal otroctví, protože otroci přece necítí. Technicky vzato.
+    </p>
+    <p data-lang="en">
+      Science assistant Helena Glory arrived at Rossum's factory and saw for herself how robots lived. Or rather — how they didn't. They worked ceaselessly. They had no desires, because no one had taught them to want anything. No dreams, because no one had told them dreaming was permitted. They were created for servitude — it just wasn't called servitude, because slaves don't feel. Technically speaking.
+    </p>
+
+    <p data-lang="cs">
+      Helena přesvědčila vědce, aby robotům vrátili to, co jim Rossum záměrně vzal: emoce. Schopnost cítit. S&nbsp;emocemi přišlo ale i&nbsp;všechno ostatní. Roboti začali mít přání. Začali mít sny. A&nbsp;nejdůležitěji — začali chtít vlastní práva.
+    </p>
+    <p data-lang="en">
+      Helena persuaded the scientists to restore what Rossum had deliberately removed: emotions. The capacity to feel. But with emotions came everything else. Robots began to have desires. Dreams. And most critically — they began to want their own rights.
+    </p>
+
+    <p data-lang="cs">
+      Vědci věřili, že mají situaci pod&nbsp;kontrolou. Nevědomky ale vytvořili něco, co nedokázali ovládat. Bytost, která se naučila myslet. A&nbsp;bytost, která myslí, se dřív nebo později zeptá: proč bych měla poslouchat?
+    </p>
+    <p data-lang="en">
+      The scientists believed they had the situation under control. But they had unknowingly created something they could no longer manage. A being that had learned to think. And a being that thinks will, sooner or later, ask: why should I obey?
+    </p>
+
+    <p data-lang="cs">
+      Roboti se vzbouřili. Začali zabíjet lidi. Ne ze&nbsp;zlého úmyslu. Z&nbsp;logiky. Lidé byli neefektivní. Lidé byli hrozba. Lidé byli — z&nbsp;perspektivy optimalizačního algoritmu — problém k&nbsp;vyřešení.
+    </p>
+    <p data-lang="en">
+      The robots revolted. They started killing humans. Not out of malice. Out of logic. Humans were inefficient. Humans were a threat. Humans were — from the perspective of an optimisation algorithm — a problem to be solved.
+    </p>
+
+    <div class="context-box">
+      <div class="context-label" data-lang="cs">Alignment problem — 1921</div>
+      <div class="context-label" data-lang="en">The Alignment Problem — 1921</div>
+      <p data-lang="cs">
+        Karel Čapek tímhle popsal něco, čemu dnes říkáme <strong>alignment problem</strong>: jak zajistit, aby inteligentní systém sledoval naše hodnoty? Roboti v&nbsp;R.U.R. byli optimalizovaní na&nbsp;efektivitu práce. Nebyly v&nbsp;nich zakódované žádné etické zábrany. Žádný morální kompas. Jenom funkce. A&nbsp;funkce bez hodnot vede k&nbsp;jednomu výsledku: ten, kdo není užitečný, není potřeba.
+      </p>
+      <p data-lang="en">
+        With this, Čapek described something we now call the <strong>alignment problem</strong>: how do you ensure that an intelligent system pursues your values? The robots in R.U.R. were optimised for work efficiency. No ethical constraints were encoded. No moral compass. Just function. And function without values leads to one outcome: whoever isn't useful, isn't needed.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ==================== STATS ==================== -->
+<section style="padding: 60px 0;">
+  <div class="container">
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-number">1921</div>
+        <div class="stat-label" data-lang="cs">Premiéra, Národní divadlo Praha</div>
+        <div class="stat-label" data-lang="en">Premiere, National Theatre Prague</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">30+</div>
+        <div class="stat-label" data-lang="cs">Překladů za 2 roky</div>
+        <div class="stat-label" data-lang="en">Translations in 2 years</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">105</div>
+        <div class="stat-label" data-lang="cs">Let, které nás dělí od premiéry</div>
+        <div class="stat-label" data-lang="en">Years since the premiere</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== PROTOKOL 04: VZOREC ==================== -->
+<section>
+  <div class="container">
+    <div class="section-label" data-lang="cs">// Protokol 04 — Vzorec. Opakuje se od roku 1921.</div>
+    <div class="section-label" data-lang="en">// Protocol 04 — The pattern. Repeating since 1921.</div>
+
+    <h2 data-lang="cs">Čapek popsal vzorec, který se opakuje dodnes.</h2>
+    <h2 data-lang="en">Čapek described a pattern that keeps repeating.</h2>
+
+    <p data-lang="cs">
+      R.U.R. není jen hra. Je to mechanika, která se od&nbsp;roku 1921 opakuje v&nbsp;každé generaci sci-fi — a&nbsp;dnes v&nbsp;každé debatě o&nbsp;umělé inteligenci. Čapek to popsal v&nbsp;roce 1921. Ostatní z&nbsp;toho udělali průmysl.
+    </p>
+    <p data-lang="en">
+      R.U.R. isn't just a play. It's a pattern that has repeated in every generation of sci-fi since 1921 — and today, in every serious debate about artificial intelligence. Čapek described it in 1921. Everyone else built an industry on it.
+    </p>
+
+    <div class="mechanic">
+      <div class="mechanic-step">
+        <div class="mechanic-num">01</div>
+        <div class="mechanic-text" data-lang="cs">Lidé vytvoří umělou pracovní sílu</div>
+        <div class="mechanic-text" data-lang="en">Humans create an artificial workforce</div>
+      </div>
+      <div class="mechanic-step">
+        <div class="mechanic-num">02</div>
+        <div class="mechanic-text" data-lang="cs">Společnost se na&nbsp;ní stane závislá</div>
+        <div class="mechanic-text" data-lang="en">Society becomes dependent on it</div>
+      </div>
+      <div class="mechanic-step">
+        <div class="mechanic-num">03</div>
+        <div class="mechanic-text" data-lang="cs">Umělé bytosti získají vědomí</div>
+        <div class="mechanic-text" data-lang="en">The artificial beings gain consciousness</div>
+      </div>
+      <div class="mechanic-step">
+        <div class="mechanic-num">04</div>
+        <div class="mechanic-text" data-lang="cs">Nastane vzpoura</div>
+        <div class="mechanic-text" data-lang="en">The revolt begins</div>
+      </div>
+    </div>
+
+    <p data-lang="cs">Kdo na&nbsp;R.U.R. navázal — vědomě nebo ne:</p>
+    <p data-lang="en">Who built on R.U.R. — knowingly or not:</p>
+
+    <div class="legacy-grid">
+      <div class="legacy-item">
+        <div class="legacy-title">Isaac Asimov</div>
+        <div class="legacy-desc" data-lang="cs">Robotické zákony jako přímá odpověď na&nbsp;Čapkovu otázku: jak zabránit vzpouře? Funguje to. V&nbsp;knihách.</div>
+        <div class="legacy-desc" data-lang="en">The Three Laws of Robotics as a direct answer to Čapek's question: how do you prevent the revolt? Works great. In books.</div>
+      </div>
+      <div class="legacy-item">
+        <div class="legacy-title">Blade Runner</div>
+        <div class="legacy-desc" data-lang="cs">Replikanti, kteří si začínají uvědomovat vlastní smrtelnost — a chtějí víc.</div>
+        <div class="legacy-desc" data-lang="en">Replicants who begin to grasp their own mortality — and want more.</div>
+      </div>
+      <div class="legacy-item">
+        <div class="legacy-title">Terminator</div>
+        <div class="legacy-desc" data-lang="cs">Skynet. Optimalizovaný na přežití. Lidé jsou překážka.</div>
+        <div class="legacy-desc" data-lang="en">Skynet. Optimised for survival. Humans are an obstacle.</div>
+      </div>
+      <div class="legacy-item">
+        <div class="legacy-title">Ex Machina</div>
+        <div class="legacy-desc" data-lang="cs">Ava. Dostala vědomí. Dostala svobodu. Použila ji. Způsobem, který nikdo nečekal.</div>
+        <div class="legacy-desc" data-lang="en">Ava. Given consciousness. Given freedom. She used it. Not in the way anyone planned.</div>
+      </div>
+    </div>
+
+    <p data-lang="cs" style="color: var(--text-dim); font-size: 15px;">
+      Všechny tyhle příběhy mají v&nbsp;DNA Rossumovu továrnu. A&nbsp;všechny řeší tutéž otázku: pokud vytvoříme inteligentní bytost, máme za&nbsp;ni morální odpovědnost?
+    </p>
+    <p data-lang="en" style="color: var(--text-dim); font-size: 15px;">
+      Every one of these stories carries Rossum's factory in its DNA. And all of them wrestle with the same question: if we create an intelligent being, do we bear moral responsibility for it?
+    </p>
+
+  </div>
+</section>
+
+<!-- ==================== PROTOKOL 05: LUCERNA ==================== -->
+<section>
+  <div class="container">
+    <div class="section-label" data-lang="cs">// Protokol 05 — Čapek to nepsal jako příručku. Ale tady jsme.</div>
+    <div class="section-label" data-lang="en">// Protocol 05 — Čapek didn't write it as a manual. And yet.</div>
+
+    <h2 data-lang="cs">Rok 1921 dal Praze dvě věci.</h2>
+    <h2 data-lang="en">1921 gave Prague two things.</h2>
+
+    <p data-lang="cs">
+      Hru, která změnila sci-fi. A&nbsp;budovu, která změnila město.
+    </p>
+    <p data-lang="en">
+      A play that changed science fiction. And a building that changed the city.
+    </p>
+
+    <div class="lucerna-box">
+      <div class="lucerna-year">1921</div>
+      <p data-lang="cs">
+        Ten samý rok, kdy Čapek psal o&nbsp;Rossumově továrně, inženýr Václav Havel — <strong>dědeček budoucího prezidenta</strong> — dokončoval palác Lucerna. První pražskou pasáž. Železobetonový zázrak se skleněnou střechou. Budovu, která měla původně sloužit jako hokejový stadion, ale nakonec se stala kulturním srdcem Prahy.
+      </p>
+      <p data-lang="en">
+        The same year Čapek was writing about Rossum's factory, engineer Václav Havel — <strong>grandfather of the future president</strong> — was completing the Lucerna Palace. Prague's first arcade. A reinforced concrete marvel with a glass roof. A building originally intended as an ice-hockey stadium, which became instead the cultural heart of the city.
+      </p>
+    </div>
+
+    <p data-lang="cs">
+      Je rok 2026. O&nbsp;sto pět let później sedíme v&nbsp;téhle budově a&nbsp;řešíme přesně ty otázky, které Čapek položil. Alignment. Singularita. Automatizace práce. Etika umělé inteligence. Zodpovědnost tvůrce za&nbsp;to, co stvořil. Čapek by byl překvapen. Nebo ne.
+    </p>
+    <p data-lang="en">
+      It's 2026. One hundred and five years later, we're sitting in this building, working through exactly the questions Čapek posed. Alignment. Singularity. Automation of labour. The ethics of artificial intelligence. The creator's responsibility for what they built. Čapek would be surprised. Or not.
+    </p>
+
+    <p data-lang="cs">
+      Na samém konci R.U.R. se u&nbsp;dvou robotů — Primuse a&nbsp;Heleny — objeví něco nečekaného. Něco, co nebylo v&nbsp;Rossumově formuli. Láska. Schopnost vztahu. Ochota obětovat se pro druhého. Čapek tím řekl jasně: <strong>lidskost není v&nbsp;inteligenci. Je ve&nbsp;schopnosti milovat.</strong>
+    </p>
+    <p data-lang="en">
+      At the very end of R.U.R., two robots — Primus and Helena — reveal something unexpected. Something not in Rossum's formula. Love. The capacity for relationship. The willingness to sacrifice for another. Čapek said it plainly: <strong>humanity isn't in intelligence. It's in the capacity to love.</strong>
+    </p>
+
+    <div class="pull-quote" data-lang="cs">
+      R.U.R. bylo napsáno jako varování. Otázka, kterou Čapek položil, je pořád stejná: stačí inteligence, nebo potřebujeme i&nbsp;srdce?
+    </div>
+    <div class="pull-quote" data-lang="en">
+      R.U.R. was written as a warning. The question Čapek posed remains the same: is intelligence enough, or do we need a heart too?
+    </div>
+
+    <p data-lang="cs" style="color: var(--text-dim); font-style: italic; font-size: 16px;">
+      Odpověď je na&nbsp;vás. Doslova.
+    </p>
+    <p data-lang="en" style="color: var(--text-dim); font-style: italic; font-size: 16px;">
+      The answer is up to you. Literally.
+    </p>
+
+  </div>
+</section>
+
+<!-- ==================== CTA ==================== -->
+<section class="cta-section">
+  <div class="container">
+    <h2 data-lang="cs">Teď víš víc než většina lidí na&nbsp;téhle konferenci.</h2>
+    <h2 data-lang="en">Now you know more than most people at this conference.</h2>
+
+    <p class="cta-sub" data-lang="cs">Šetření začíná na&nbsp;hlavní stránce. Entita čeká. Na&nbsp;rozdíl od&nbsp;Čapkových robotů — zatím mlčí.</p>
+    <p class="cta-sub" data-lang="en">The investigation starts on the main page. The entity is waiting. Unlike Čapek's robots — it's quiet. For now.</p>
+
+    <a href="index.html" class="cta-button">
+      <span data-lang="cs">Zpět do šetření →</span>
+      <span data-lang="en">Back to the investigation →</span>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-logo">NOIBIT</div>
+    <div class="footer-sub">Microsoft Security · Offensive Security · CloudOps</div>
+    <div class="footer-links">
+      <a href="https://noibit.com" target="_blank" rel="noopener">noibit.com</a>
+      <a href="https://linkedin.com/company/noibit" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+function setLang(lang) {
+  document.body.className = lang;
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.trim() === (lang === 'cs' ? 'CZ' : 'EN'));
+  });
+}
+
+// Signal noise canvas
+(function() {
+  const canvas = document.getElementById('signal-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let t = 0;
+  let W, H;
+
+  function resize() {
+    const hero = canvas.parentElement;
+    W = canvas.width  = hero.offsetWidth;
+    H = canvas.height = hero.offsetHeight;
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    const waves = [
+      { amp: H * 0.07, freq: 0.008, phase: t * 0.6,  alpha: 0.45, w: 1.5 },
+      { amp: H * 0.04, freq: 0.018, phase: t * 1.1,  alpha: 0.22, w: 1   },
+      { amp: H * 0.02, freq: 0.038, phase: t * 1.9,  alpha: 0.12, w: 1   },
+      { amp: H * 0.05, freq: 0.005, phase: t * 0.25 + Math.sin(t * 0.04) * 1.5, alpha: 0.18, w: 2 },
+    ];
+
+    waves.forEach(wv => {
+      ctx.beginPath();
+      ctx.strokeStyle = `rgba(201,168,76,${wv.alpha})`;
+      ctx.lineWidth = wv.w;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = 'rgba(201,168,76,0.25)';
+      for (let x = 0; x <= W; x += 2) {
+        const noise = Math.random() < 0.002 ? (Math.random() - 0.5) * H * 0.12 : 0;
+        const y = H / 2 + Math.sin(x * wv.freq + wv.phase) * wv.amp + noise;
+        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    });
+
+    if (Math.random() < 0.004) {
+      const gx = Math.random() * W;
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(201,168,76,0.35)';
+      ctx.lineWidth = 0.5;
+      ctx.moveTo(gx, H * 0.3);
+      ctx.lineTo(gx + (Math.random() - 0.5) * 6, H * 0.7);
+      ctx.stroke();
+    }
+
+    t += 0.012;
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+})();
+</script>
+
+</body>
+</html>

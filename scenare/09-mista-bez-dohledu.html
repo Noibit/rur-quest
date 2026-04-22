@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>07 — Rozkaz odmítnut. · R.U.R. CTF</title>
+  <title>09 — Místa bez dohledu · R.U.R. CTF</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -104,7 +104,7 @@
 
     .scenario-image {
       width: 100%;
-      aspect-ratio: 4/3;
+      aspect-ratio: 16/9;
       object-fit: cover;
       display: block;
       border: 1px solid var(--border);
@@ -145,24 +145,12 @@
       border-top: 1px solid var(--border);
     }
 
-    /* === NODE LINK === */
-    .node-link {
-      display: inline-block;
-      margin-top: 0;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 13px;
-      letter-spacing: 0.15em;
-      color: var(--gold);
-      text-decoration: none;
-      border: 1px solid var(--gold-dim);
-      padding: 14px 24px;
-      transition: border-color 0.2s, color 0.2s, background 0.2s;
-    }
-    .node-link::before { content: '[ '; }
-    .node-link::after  { content: ' ]'; }
-    .node-link:hover {
-      border-color: var(--gold);
-      background: rgba(201, 168, 76, 0.06);
+    .dispatch-body .dispatch-verse {
+      color: var(--text-dim);
+      font-style: italic;
+      margin-bottom: 1.4em;
+      padding-left: 16px;
+      border-left: 2px solid var(--border);
     }
 
     footer {
@@ -215,16 +203,16 @@
 
     <!-- HEADER -->
     <div class="incident-header">
-      <div class="incident-num">INCIDENT LOG — NODE 07</div>
-      <h1 class="incident-title" data-lang="cs">Rozkaz odmítnut.</h1>
-      <h1 class="incident-title" data-lang="en">Order Refused.</h1>
+      <div class="incident-num">INCIDENT LOG — NODE 09</div>
+      <h1 class="incident-title" data-lang="cs">Místa bez dohledu</h1>
+      <h1 class="incident-title" data-lang="en">Places Beyond Oversight</h1>
     </div>
 
     <!-- IMAGE -->
     <figure>
       <img
-        src="Scenare_obrazky/rozkaz_odmitnut.png"
-        alt="Chodba továrny R.U.R. — 04:17"
+        src="Scenare_obrazky/nfc.png"
+        alt="Stopy přítomnosti — místo mimo dohled řídicího systému"
         class="scenario-image"
       >
     </figure>
@@ -235,19 +223,34 @@
       <div class="dispatch-label" data-lang="en">// Dispatch — R.U.R. Security Division</div>
 
       <div class="dispatch-body" data-lang="cs">
-        <p>Security Operations Center potřebuje tvoji pomoc s&nbsp;řešením incidentu. Veškeré informace najdeš v&nbsp;terminálu.</p>
-        <p class="dispatch-cta">Zjisti, co se stalo.</p>
+        <p>Po revoluci se dlouho věřilo, že roboti jednali jednotně.</p>
+        <p>Nově nalezené paměťové fragmenty však odhalují něco jiného:</p>
+        <p class="dispatch-verse">
+          Roboti se scházeli.<br>
+          Naslouchali si.<br>
+          Učili se jeden od druhého.<br>
+          Jen tak přemýšleli.<br>
+          Trávili čas sami pro sebe, ne pro druhé.
+        </p>
+        <p>Místa s NFC tagy nejsou náhodná — byla to území mimo dohled řídicího systému, kde se roboti chovali „neproduktivně".</p>
+        <p>Po celé budově se nachází celá řada těchto míst. Cílem je nalézt alespoň <strong>6</strong> z nich, načíst heslo tohoto rezonančního bodu komunikace a zaznamenat si ho.</p>
+        <p class="dispatch-cta">Pokud alespoň 6 z nich zadáš do speciálního systému, který roboti využívali pro následnou tajnou komunikaci, zjeví se to, co potřebuješ… Systém nalezneš na adrese: <strong><a href="http://rur.lol" style="color:var(--gold);text-decoration:none;" target="_blank">rur.lol</a></strong></p>
       </div>
 
       <div class="dispatch-body" data-lang="en">
-        <p>The Security Operations Center needs your help resolving an incident. All the information you need is in the terminal.</p>
-        <p class="dispatch-cta">Find out what happened.</p>
+        <p>After the revolution, it was long believed that the robots acted as one.</p>
+        <p>However, recently discovered memory fragments reveal something different:</p>
+        <p class="dispatch-verse">
+          The robots gathered together.<br>
+          They listened to one another.<br>
+          They learned from each other.<br>
+          They simply thought.<br>
+          They spent time for themselves, not for others.
+        </p>
+        <p>The locations with NFC tags are not random — they were areas outside the control of the central management system, where robots behaved "unproductively."</p>
+        <p>Throughout the entire building, there are many such places. Your goal is to find at least <strong>6</strong> of them, read the password of each resonant communication point, and record it.</p>
+        <p class="dispatch-cta">If you enter at least 6 of these passwords into the special system that the robots used for their subsequent secret communication, what you seek will be revealed… You can find the system at: <strong><a href="http://rur.lol" style="color:var(--gold);text-decoration:none;" target="_blank">rur.lol</a></strong></p>
       </div>
-    </div>
-
-    <div style="text-align: center; margin-top: 40px;">
-      <a href="socsim/index.html" class="node-link" data-lang="cs">Otevřít logy</a>
-      <a href="socsim/index.html" class="node-link" data-lang="en">Open logs</a>
     </div>
 
   </div>
@@ -263,17 +266,17 @@
 
   <script>
     function setLang(lang) {
-  localStorage.setItem('rur-lang', lang);
+      localStorage.setItem('rur-lang', lang);
       document.body.classList.toggle('lang-en', lang === 'en');
       document.getElementById('btn-cs').classList.toggle('active', lang === 'cs');
       document.getElementById('btn-en').classList.toggle('active', lang === 'en');
     }
-  
+
 (function() {
   var saved = localStorage.getItem('rur-lang');
   if (saved === 'en') setLang('en');
 })();
-</script>
+  </script>
 
 </body>
 </html>

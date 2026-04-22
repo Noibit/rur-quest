@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WireDolphin - Network Forensics Simulator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+/* Wireshark HTTP green: #e4ffc7 on #8fbc46 bg -- pouzivame tmavou variantu */
+:root{--bg1:#202124;--bg2:#2a2b2e;--bg3:#303134;--bghov:#383a3e;--bgsel:#1a3a5c;--tp:#e8eaed;--ts:#9aa0a6;--td:#5f6368;--ab:#4a9eff;--ag:#34a853;--ay:#fbbc04;--ar:#ea4335;--bd:#3c4043;
+  /* Wireshark barvy radku - co nejblize originalu */
+  --http-row-bg:#e4ffc7;--http-row-fg:#000000;
+  --https-row-bg:#d2eaff;--https-row-fg:#000000;
+  --dns-row-bg:#daeeff;--dns-row-fg:#000000;
+  --tcp-row-bg:#e7e6ff;--tcp-row-fg:#000000;
+  --tls-row-bg:#e7e6ff;--tls-row-fg:#000000;
+  --quic-row-bg:#cce5ff;--quic-row-fg:#000000;
+  --arp-row-bg:#faf0d7;--arp-row-fg:#000000;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'JetBrains Mono',monospace;background:var(--bg1);color:var(--tp);display:flex;flex-direction:column;font-size:12px;}
+::-webkit-scrollbar{width:7px;height:7px;}::-webkit-scrollbar-track{background:var(--bg1);}::-webkit-scrollbar-thumb{background:#3c4043;border-radius:4px;}
+.tb{background:#181a1d;border-bottom:1px solid var(--bd);padding:5px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.tb-title{font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:13px;}
+.tb-sub{font-size:10px;color:var(--ts);font-family:'IBM Plex Sans',sans-serif;}
+.live-badge{display:flex;align-items:center;gap:5px;background:var(--bg3);border:1px solid var(--bd);border-radius:4px;padding:3px 8px;font-size:10px;color:var(--ts);margin-left:auto;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--ar);animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.mb{background:var(--bg2);border-bottom:1px solid var(--bd);padding:2px 8px;display:flex;gap:2px;flex-shrink:0;}
+.mi{font-family:'IBM Plex Sans',sans-serif;font-size:12px;padding:3px 8px;color:var(--ts);cursor:pointer;border-radius:3px;}
+.mi:hover{background:var(--bghov);color:var(--tp);}
+.toolbar{background:var(--bg2);border-bottom:1px solid var(--bd);padding:4px 8px;display:flex;align-items:center;gap:3px;flex-shrink:0;}
+.tbt{width:28px;height:28px;border:1px solid transparent;background:transparent;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--ts);}
+.tbt:hover{background:var(--bghov);border-color:var(--bd);color:var(--tp);}
+.tsep{width:1px;height:20px;background:var(--bd);margin:0 3px;}
+.fb{background:var(--bg2);border-bottom:2px solid var(--bd);padding:5px 8px;display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.fl{font-size:11px;color:var(--ts);white-space:nowrap;font-family:'IBM Plex Sans',sans-serif;}
+.fiw{flex:1;position:relative;display:flex;align-items:center;}
+.fi{width:100%;height:28px;background:var(--bg1);border:1.5px solid var(--bd);border-radius:4px;color:var(--tp);font-family:'JetBrains Mono',monospace;font-size:12px;padding:0 28px 0 8px;outline:none;}
+.fi:focus{border-color:var(--ab);}.fi.ok{border-color:var(--ag);}.fi.err{border-color:var(--ar);background:#1a0d0d;}
+.fclear{position:absolute;right:6px;background:none;border:none;color:var(--td);cursor:pointer;font-size:15px;display:none;}
+.fclear.on{display:block;}
+.fapply{height:28px;padding:0 14px;background:var(--ab);border:none;border-radius:4px;color:#fff;font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:12px;cursor:pointer;}
+.fapply:hover{background:#3a8eef;}
+.hints{display:flex;gap:4px;overflow-x:auto;}
+.hc{height:22px;padding:0 8px;background:var(--bg3);border:1px solid var(--bd);border-radius:3px;font-size:10px;color:var(--ts);cursor:pointer;white-space:nowrap;display:flex;align-items:center;}
+.hc:hover{background:var(--bghov);color:var(--tp);border-color:var(--ab);}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+.tw{flex:1;overflow:auto;min-height:0;}
+.pt{width:100%;border-collapse:collapse;min-width:680px;}
+.pt thead{position:sticky;top:0;z-index:50;}
+.pt th{background:var(--bg2);border-bottom:1px solid var(--bd);border-right:1px solid var(--bd);padding:5px 8px;text-align:left;font-size:11px;font-weight:600;color:var(--ts);white-space:nowrap;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;}
+.pt th:hover{background:var(--bghov);color:var(--tp);}.pt th:last-child,.pt td:last-child{border-right:none;}
+.pt td{padding:3px 8px;border-bottom:1px solid #2a2b2e;border-right:1px solid #2a2b2e;white-space:nowrap;font-size:11.5px;height:22px;overflow:hidden;text-overflow:ellipsis;max-width:300px;}
+.pr{cursor:pointer;}.pr:hover td{filter:brightness(1.15);}.pr.sel td{background:var(--bgsel)!important;color:var(--tp)!important;}
+/* Wireshark row colors - svetle pozadi jako v originalu ale na tmavem UI */
+.rtls td{background:#1e2a3a!important;color:#aac8f0!important;}
+.rhttp td{background:#1a3010!important;color:#96b872!important;}
+.rhttps td{background:#1a2a3a!important;color:#7eb8d4!important;}
+.rdns td{background:#2a2a10!important;color:#d4c87a!important;}
+.rtcp td{background:#221a30!important;color:#b8a8e0!important;}
+.rquic td{background:#102a2a!important;color:#7acece!important;}
+.rarp td{background:#2a1e10!important;color:#d4aa7a!important;}
+.pb{display:inline-block;padding:1px 5px;border-radius:2px;font-size:10px;font-weight:700;}
+.pb-http{background:#1a3010;color:#96b872;border:1px solid #2a4a18;}.pb-https{background:#1a3a4a;color:#7eb8d4;border:1px solid #1a5a6a;}
+.pb-tls12{background:#1e2a3a;color:#aac8f0;border:1px solid #2a4060;}.pb-tls13{background:#162535;color:#90c0e8;border:1px solid #1a3a5a;}
+.pb-quic{background:#102a2a;color:#7acece;border:1px solid #1a4a4a;}.pb-dns{background:#2a2a10;color:#d4c87a;border:1px solid #4a4a18;}
+.pb-tcp{background:#221a30;color:#b8a8e0;border:1px solid #3a2a50;}.pb-arp{background:#2a1e10;color:#d4aa7a;border:1px solid #4a3018;}
+.resizer{height:5px;background:var(--bg3);border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);cursor:row-resize;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.resizer:after{content:'...';color:var(--td);font-size:10px;letter-spacing:3px;}.resizer:hover{background:var(--bghov);}
+.bot{display:flex;border-top:1px solid var(--bd);flex-shrink:0;height:260px;min-height:100px;max-height:60vh;}
+.det{flex:1;overflow-y:auto;background:var(--bg1);border-right:1px solid var(--bd);min-width:0;}
+.pnh{background:var(--bg2);border-bottom:1px solid var(--bd);padding:4px 10px;font-size:10px;color:var(--ts);font-family:'IBM Plex Sans',sans-serif;font-weight:600;letter-spacing:.05em;text-transform:uppercase;position:sticky;top:0;z-index:10;}
+.dph{padding:20px;color:var(--td);font-size:11px;text-align:center;font-style:italic;}
+.hex{width:520px;min-width:520px;overflow:auto;background:#181a1d;flex-shrink:0;}
+.hxc{padding:8px;font-size:10px;line-height:1.7;white-space:pre;color:#6a8a6a;}
+.hxr{display:flex;gap:8px;}.hxa{color:var(--td);width:38px;flex-shrink:0;}.hxb{color:#5a7a5a;flex:1;letter-spacing:.03em;}.hxb.hl{color:var(--ag);}.hxs{color:#4a6a4a;width:120px;}
+.la{border-bottom:1px solid var(--bg3);}
+.lh{display:flex;align-items:center;gap:6px;padding:5px 10px;cursor:pointer;background:var(--bg2);user-select:none;}
+.lh:hover{background:var(--bghov);}
+.larr{font-size:9px;color:var(--td);transition:transform .15s;width:10px;text-align:center;}
+.la.open .larr{transform:rotate(90deg);}
+.ltit{font-size:11.5px;font-weight:500;flex:1;}
+.lframe .ltit{color:var(--tp);}.leth .ltit{color:var(--ts);}.lip .ltit{color:#aac8f0;}.ltcp .ltit{color:#b8a8e0;}.lhttp .ltit{color:#b8e68a;}
+.lb{display:none;padding:4px 0 4px 22px;background:var(--bg1);}
+.la.open .lb{display:block;}
+.lf{display:flex;padding:2px 10px 2px 0;gap:4px;font-size:11px;line-height:1.5;}
+.fn{color:var(--ts);white-space:nowrap;}.fv{color:var(--tp);word-break:break-all;}
+.fv.g{color:var(--ag);font-weight:700;}.fv.y{color:var(--ay);font-weight:700;}.fv.r{color:var(--ar);font-weight:700;}.fv.b{color:var(--ab);}
+.mhex{display:none;margin-top:12px;border-top:1px solid var(--bd);padding-top:10px;}
+.mhex-btn{width:100%;padding:8px 14px;background:var(--bg3);border:1px solid var(--bd);border-radius:6px;color:var(--ts);font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer;text-align:left;margin-top:10px;}
+.mhex-btn:hover{background:var(--bghov);color:var(--tp);}
+.mhex-content{margin-top:8px;background:#181a1d;border-radius:4px;padding:8px;font-size:9px;line-height:1.7;overflow-x:auto;white-space:pre;color:#6a8a6a;display:none;}
+.mhex.expanded .mhex-content{display:block;}
+.mhex.expanded .mhex-btn{color:var(--ag);border-color:var(--ag);}
+.flagbox{margin:6px 10px 6px 0;padding:8px 12px;background:#0a1f0a;border:1px solid var(--ag);border-radius:4px;font-size:12px;color:var(--ag);font-weight:700;letter-spacing:.05em;word-break:break-all;animation:fg 2s ease-in-out infinite;}
+@keyframes fg{0%,100%{box-shadow:0 0 8px rgba(52,168,83,.3);}50%{box-shadow:0 0 20px rgba(52,168,83,.6);}}
+.flbl{font-size:9px;color:var(--ag);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;opacity:.7;}
+.sb{background:#181a1d;border-top:1px solid var(--bd);padding:3px 10px;display:flex;gap:14px;font-size:10px;color:var(--td);flex-shrink:0;font-family:'IBM Plex Sans',sans-serif;overflow-x:auto;white-space:nowrap;}
+.sh{color:var(--ts);}
+.empty{text-align:center;padding:40px 20px;color:var(--td);font-size:12px;}
+.strip{padding:4px 10px;background:#182818;border-bottom:1px solid #2d4a2d;font-size:10px;color:#b8e68a;display:none;}
+.strip.on{display:block;}
+.moverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:flex-end;}
+.moverlay.on{display:flex;}
+.msheet{background:var(--bg1);width:100%;max-height:80vh;border-radius:12px 12px 0 0;border-top:2px solid var(--ag);overflow-y:auto;animation:su .2s ease;}
+@keyframes su{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.mhead{position:sticky;top:0;background:var(--bg2);padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bd);z-index:10;}
+.mtit{flex:1;font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:13px;color:var(--httx);}
+.mclose{width:32px;height:32px;background:var(--bg3);border:1px solid var(--bd);border-radius:6px;color:var(--ts);cursor:pointer;font-size:16px;}
+.mbody{padding:12px;}
+@media(max-width:768px){
+  .hex{display:none;}
+  .hints{display:none;}
+  .tb-sub{display:none;}
+  .mb{display:none;}
+  .col-no{display:none;}
+  .col-time{display:none;}
+  .col-len{display:none;}
+  .pt{min-width:unset;}
+  .mhex{display:block!important;}
+}
+</style>
+</head>
+<body>
+<div class="tb">
+  <span style="font-size:16px">&#x1F42C;</span>
+  <div>
+    <div class="tb-title">WireDolphin - Network Forensics Simulator</div>
+    <div class="tb-sub">capture_session_2026_04_22.pcapng &middot; eth0</div>
+  </div>
+</div>
+<div class="mb">
+  <span class="mi">File</span><span class="mi">Edit</span><span class="mi">View</span><span class="mi">Go</span>
+  <span class="mi">Capture</span><span class="mi">Analyze</span><span class="mi">Statistics</span>
+  <span class="mi">Telephony</span><span class="mi">Wireless</span><span class="mi">Tools</span><span class="mi">Help</span>
+</div>
+<div class="toolbar">
+  <button class="tbt">&#9654;</button><button class="tbt" style="color:#ea4335;font-size:15px">&#9632;</button>
+  <button class="tbt" style="font-size:16px">&#8635;</button><div class="tsep"></div>
+  <button class="tbt">&#128194;</button><button class="tbt">&#128190;</button><div class="tsep"></div>
+  <button class="tbt">&#128269;</button><button class="tbt">&rarr;</button><div class="tsep"></div>
+  <button class="tbt">&#128202;</button>
+</div>
+<div class="fb">
+  <div class="fiw">
+    <input class="fi" id="fi" type="text" placeholder="Apply a simplified display filter ..." autocomplete="off" spellcheck="false">
+    <button class="fclear" id="fcl">&times;</button>
+  </div>
+  <button class="fapply" id="fap">Apply</button>
+
+</div>
+<div class="strip" id="strip"></div>
+<div class="main">
+  <div class="tw">
+    <table class="pt">
+      <thead><tr>
+        <th class="col-no" style="width:52px">No.</th><th class="col-time" style="width:88px">Time</th>
+        <th style="width:130px">Source</th><th style="width:130px">Destination</th>
+        <th style="width:95px">Protocol</th><th class="col-len" style="width:60px">Length</th><th>Info</th>
+      </tr></thead>
+      <tbody id="pb"></tbody>
+    </table>
+    <div class="empty" id="es" style="display:none">
+      <div style="font-size:32px;margin-bottom:10px">&#128269;</div>
+      <div style="color:var(--ts);margin-bottom:6px">No packets match the current filter.</div>
+      <div>Try a different expression or clear the filter.</div>
+    </div>
+  </div>
+  <div class="resizer" id="res"></div>
+  <div class="bot" id="bot">
+    <div class="det">
+      <div class="pnh">&#9658; Packet Details</div>
+      <div class="dph" id="dph">Select a packet to see details.</div>
+      <div id="dc"></div>
+    </div>
+    <div class="hex">
+      <div class="pnh">&#9658; Hex Dump</div>
+      <div class="hxc" id="hxc"><span style="color:var(--td);font-style:italic">No packet selected.</span></div>
+    </div>
+  </div>
+</div>
+<div class="sb">
+  <span>Packets: <span class="sh" id="stot">0</span></span>
+  <span>Displayed: <span class="sh" id="sdisp">0</span></span>
+  <span>Marked: <span class="sh">0</span></span>
+  <span>Dropped: <span class="sh">0</span></span>
+  <span>Interface: eth0</span>
+  <span>Elapsed: <span class="sh" id="sel">00:00:47</span></span>
+  <span style="margin-left:auto">Profile: Default</span>
+</div>
+<div class="moverlay" id="mo">
+  <div class="msheet">
+    <div class="mhead">
+      <span class="mtit" id="mtit">Packet Details</span>
+      <button class="mclose" onclick="closeMM()">&times;</button>
+    </div>
+    <div class="mbody" id="mb2"></div>
+  </div>
+</div>
+
+<script>
+var ALL = [];
+var SEL = null;
+
+// Skutecny flag je zakodovany v Base64 — ucastnici ho musi dekodovat sami
+// btoa("NOIBIT{d0_r0b0t5_dr34m_0f_3m0t10n5}") = "RkxBR3tEMF9SMEI1X0RSMzRNXzBGMzNNMFQxME4zU30="
+// Pozor: base64 vyse je jen komentar pro organizatora, do kodu nesmi
+
+// 3 navnadove HTTP pakety s falesnym flagy + dalsi GET pakety jako svedci
+var DECOYS = [
+  {
+    no: 203, time: "8.774412", source: "10.0.0.1", dest: "192.168.1.50",
+    protocol: "HTTP", length: 312,
+    info: "HTTP/1.1 404 Not Found",
+    isDecoy: true, decoyType: "404",
+    raw: "48 54 54 50 2f 31 2e 31 20 34 30 34 20 4e 6f 74 20 46 6f 75 6e 64 0d 0a"
+  },
+  {
+    no: 517, time: "22.031887", source: "192.168.1.100", dest: "10.0.0.1",
+    protocol: "HTTP", length: 398,
+    info: "GET /updates/patch_notes.txt HTTP/1.1",
+    isDecoy: true, decoyType: "wrongfile",
+    raw: "47 45 54 20 2f 75 70 64 61 74 65 73 2f 70 61 74 63 68 5f 6e 6f 74 65 73 2e 74 78 74"
+  },
+  {
+    no: 889, time: "38.119204", source: "192.168.1.51", dest: "10.0.0.1",
+    protocol: "HTTP", length: 271,
+    info: "OPTIONS * HTTP/1.1",
+    isDecoy: true, decoyType: "options",
+    raw: "4f 50 54 49 4f 4e 53 20 2a 20 48 54 54 50 2f 31 2e 31 0d 0a"
+  },
+  // Dalsi GET pakety — svedci, aby bylo vic HTTP provozu a nebyl GET/feelings hned zrejmy
+  {
+    no: 124, time: "5.231044", source: "192.168.1.75", dest: "10.0.0.1",
+    protocol: "HTTP", length: 344,
+    info: "GET /api/v1/status HTTP/1.1",
+    isDecoy: true, decoyType: "wrongfile",
+    raw: "47 45 54 20 2f 61 70 69 2f 76 31 2f 73 74 61 74 75 73"
+  },
+  {
+    no: 301, time: "12.887210", source: "192.168.1.50", dest: "10.0.0.1",
+    protocol: "HTTP", length: 289,
+    info: "GET /robots.txt HTTP/1.1",
+    isDecoy: true, decoyType: "wrongfile",
+    raw: "47 45 54 20 2f 72 6f 62 6f 74 73 2e 74 78 74"
+  },
+  {
+    no: 412, time: "17.553901", source: "192.168.1.100", dest: "10.0.0.1",
+    protocol: "HTTP", length: 376,
+    info: "GET /firmware/check HTTP/1.1",
+    isDecoy: true, decoyType: "wrongfile",
+    raw: "47 45 54 20 2f 66 69 72 6d 77 61 72 65 2f 63 68 65 63 6b"
+  },
+  {
+    no: 634, time: "27.441782", source: "192.168.1.51", dest: "10.0.0.1",
+    protocol: "HTTP", length: 261,
+    info: "GET /config/defaults.json HTTP/1.1",
+    isDecoy: true, decoyType: "wrongfile",
+    raw: "47 45 54 20 2f 63 6f 6e 66 69 67 2f 64 65 66 61 75 6c 74 73 2e 6a 73 6f 6e"
+  },
+  {
+    no: 741, time: "32.008541", source: "192.168.1.200", dest: "10.0.0.1",
+    protocol: "HTTP", length: 319,
+    info: "GET /updates/manifest.xml HTTP/1.1",
+    isDecoy: true, decoyType: "wrongfile",
+    raw: "47 45 54 20 2f 75 70 64 61 74 65 73 2f 6d 61 6e 69 66 65 73 74 2e 78 6d 6c"
+  },
+  {
+    no: 822, time: "35.774100", source: "192.168.1.75", dest: "10.0.0.1",
+    protocol: "HTTP", length: 294,
+    info: "HTTP/1.1 200 OK",
+    isDecoy: true, decoyType: "404",
+    raw: "48 54 54 50 2f 31 2e 31 20 32 30 30 20 4f 4b 0d 0a"
+  },
+  {
+    no: 956, time: "41.220337", source: "192.168.1.50", dest: "10.0.0.1",
+    protocol: "HTTP", length: 408,
+    info: "GET /api/v2/diagnostics HTTP/1.1",
+    isDecoy: true, decoyType: "wrongfile",
+    raw: "47 45 54 20 2f 61 70 69 2f 76 32 2f 64 69 61 67 6e 6f 73 74 69 63 73"
+  },
+  // Tri HTTP pakety tesne za CRIT (time 45.12), aby nebyl posledni HTTP
+  {
+    no: 9001, time: "46.338812", source: "192.168.1.100", dest: "10.0.0.1",
+    protocol: "HTTP", length: 351,
+    info: "GET /health HTTP/1.1",
+    isDecoy: true, decoyType: "wrongfile",
+    raw: "47 45 54 20 2f 68 65 61 6c 74 68"
+  },
+  {
+    no: 9002, time: "47.901044", source: "192.168.1.51", dest: "10.0.0.1",
+    protocol: "HTTP", length: 289,
+    info: "HTTP/1.1 200 OK",
+    isDecoy: true, decoyType: "404",
+    raw: "48 54 54 50 2f 31 2e 31 20 32 30 30 20 4f 4b 0d 0a"
+  },
+  {
+    no: 9003, time: "49.554231", source: "192.168.1.75", dest: "10.0.0.1",
+    protocol: "HTTP", length: 377,
+    info: "GET /api/v1/ping HTTP/1.1",
+    isDecoy: true, decoyType: "wrongfile",
+    raw: "47 45 54 20 2f 61 70 69 2f 76 31 2f 70 69 6e 67"
+  }
+];
+
+// Skutecny paket — flag je zakodovan v Base64
+var CRIT = {
+  no: 3847, time: "45.120531", source: "192.168.1.50", dest: "10.0.0.15",
+  protocol: "HTTP", length: 482,
+  info: "GET /secret_updates/feelings.exe HTTP/1.1",
+  isHTTP: true,
+  raw: "47 45 54 20 2f 73 65 63 72 65 74 5f 75 70 64 61 74 65 73 2f 66 65 65 6c 69 6e 67 73 2e 65 78 65 20 48 54 54 50 2f 31 2e 31 0d 0a 48 6f 73 74 3a 20 31 30 2e 30 2e 30 2e 31 35"
+};
+
+function rnd(a, b) { return Math.floor(Math.random() * (b - a)) + a; }
+function pick(a) { return a[rnd(0, a.length)]; }
+
+function genHex(n) {
+  var s = "";
+  var b = Math.min(n, 64);
+  for (var i = 0; i < b; i++) {
+    var h = rnd(0, 256).toString(16);
+    s += (h.length < 2 ? "0" + h : h) + " ";
+  }
+  return s.trim();
+}
+
+function buildPackets() {
+  var tlsV = ["TLSv1.2", "TLSv1.2", "TLSv1.3", "TLSv1.3", "TLSv1.3", "QUIC", "HTTPS", "HTTPS", "HTTPS"];
+  var tlsI = ["Application Data", "Application Data", "Client Hello", "Server Hello", "Certificate", "New Session Ticket", "Encrypted Alert", "Application Data [TCP segment of a reassembled PDU]"];
+  var dnsI = ["Standard query 0x1a2b A google.com", "Standard query 0xbc3d AAAA cloudflare.com", "Standard query response 0x1a2b A 142.250.185.78", "Standard query 0x4f2a A telemetry.microsoft.com", "Standard query 0x9d1e A api.github.com", "Standard query response 0xbc3d AAAA 2606:4700::6810:84e5"];
+  var tcpI = ["[SYN] Seq=0 Win=64240 Len=0 MSS=1460", "[SYN, ACK] Seq=0 Ack=1 Win=65535 Len=0", "[ACK] Seq=1 Ack=1 Win=64240 Len=0", "[FIN, ACK] Seq=1 Ack=2 Win=64240 Len=0", "[RST, ACK] Seq=1 Win=0 Len=0"];
+  var srcs = ["192.168.1.50", "192.168.1.51", "192.168.1.100", "10.0.0.1", "172.16.0.5", "192.168.1.1", "192.168.1.75", "192.168.1.200"];
+  var dsts = ["10.0.0.1", "8.8.8.8", "1.1.1.1", "142.250.185.78", "52.114.128.9", "17.253.144.10", "104.21.55.220", "13.107.42.14", "151.101.1.140"];
+
+  var list = [];
+  // Generujeme 5000 paketu pro vetsi objem dat
+  for (var i = 1; i <= 5000; i++) {
+    var r = Math.random();
+    var proto, info, src, dst, len;
+    if (r < 0.62) {
+      proto = pick(tlsV); info = pick(tlsI);
+      src = pick(srcs); dst = pick(dsts); len = rnd(300, 1520);
+    } else if (r < 0.76) {
+      proto = "QUIC"; info = "Protected Payload (KP0)";
+      src = srcs[rnd(0, 4)]; dst = pick(dsts); len = rnd(1200, 1480);
+    } else if (r < 0.87) {
+      proto = "DNS"; info = pick(dnsI);
+      src = (i % 2 === 0) ? pick(srcs) : "8.8.8.8";
+      dst = (i % 2 === 0) ? "8.8.8.8" : pick(srcs); len = rnd(60, 180);
+    } else if (r < 0.96) {
+      proto = "TCP"; info = pick(tcpI);
+      src = pick(srcs); dst = pick(dsts); len = rnd(54, 74);
+    } else {
+      proto = "ARP"; info = "Who has 192.168.1.1? Tell 192.168.1.50";
+      src = "192.168.1.50"; dst = "Broadcast"; len = 42;
+    }
+    var t = (i * 0.058 + Math.random() * 0.04).toFixed(6);
+    list.push({ no: i, time: t, source: src, dest: dst, protocol: proto, length: len, info: info, raw: genHex(len) });
+  }
+
+  // Vloz navnadove HTTP pakety a skutecny CRIT
+  // DECOYS dostanou docasne no mimo rozsah, prirazen spravne po sort
+  for (var d = 0; d < DECOYS.length; d++) list.push(DECOYS[d]);
+  list.push(CRIT);
+
+  // Serad podle casu
+  list.sort(function(a, b) { return parseFloat(a.time) - parseFloat(b.time); });
+
+  // Prečísluj všechny pakety sekvenčně — žádné kolize čísel
+  for (var n = 0; n < list.length; n++) {
+    list[n].no = n + 1;
+  }
+
+  return list;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function pbadge(p) {
+  var cls = "pb-tls12";
+  if (p === "HTTP") cls = "pb-http";
+  else if (p === "HTTPS") cls = "pb-https";
+  else if (p === "TLSv1.3") cls = "pb-tls13";
+  else if (p === "QUIC") cls = "pb-quic";
+  else if (p === "DNS") cls = "pb-dns";
+  else if (p === "TCP") cls = "pb-tcp";
+  else if (p === "ARP") cls = "pb-arp";
+  return '<span class="pb ' + cls + '">' + p + '</span>';
+}
+
+function rowCls(p) {
+  if (p === "HTTP") return "rhttp";
+  if (p === "HTTPS") return "rhttps";
+  if (p === "TLSv1.2" || p === "TLSv1.3") return "rtls";
+  if (p === "QUIC") return "rquic";
+  if (p === "DNS") return "rdns";
+  if (p === "TCP") return "rtcp";
+  if (p === "ARP") return "rarp";
+  return "";
+}
+
+function renderTable(pkts) {
+  var tbody = document.getElementById("pb");
+  var es = document.getElementById("es");
+  tbody.innerHTML = "";
+  if (pkts.length === 0) { es.style.display = "block"; return; }
+  es.style.display = "none";
+  var frags = [];
+  for (var i = 0; i < pkts.length; i++) {
+    var p = pkts[i];
+    var rc = rowCls(p.protocol);
+    var sc = (SEL && SEL.no === p.no) ? " sel" : "";
+    frags.push('<tr class="pr ' + rc + sc + '" data-idx="' + i + '">');
+    frags.push('<td class="col-no">' + p.no + '</td>');
+    frags.push('<td class="col-time">' + p.time + '</td>');
+    frags.push('<td>' + esc(p.source) + '</td>');
+    frags.push('<td>' + esc(p.dest) + '</td>');
+    frags.push('<td>' + pbadge(p.protocol) + '</td>');
+    frags.push('<td class="col-len">' + p.length + '</td>');
+    frags.push('<td style="max-width:380px;overflow:hidden;text-overflow:ellipsis">' + esc(p.info) + '</td>');
+    frags.push('</tr>');
+  }
+  tbody.innerHTML = frags.join("");
+  var rows = tbody.querySelectorAll(".pr");
+  for (var j = 0; j < rows.length; j++) {
+    (function(row, pkt) {
+      row.addEventListener("click", function() { selectPkt(pkt, row); });
+    })(rows[j], pkts[j]);
+  }
+  document.getElementById("stot").textContent = ALL.length;
+  document.getElementById("sdisp").textContent = pkts.length;
+}
+
+function selectPkt(pkt, row) {
+  var prev = document.querySelectorAll(".pr.sel");
+  for (var i = 0; i < prev.length; i++) prev[i].classList.remove("sel");
+  row.classList.add("sel");
+  SEL = pkt;
+  renderDetail(pkt);
+  renderHex(pkt);
+  if (window.innerWidth < 768) openMM(pkt);
+}
+
+function mkLayer(cls, open, title, fields) {
+  var h = '<div class="la ' + cls + (open ? ' open' : '') + '">';
+  h += '<div class="lh" onclick="tgl(this)"><span class="larr">&#9658;</span><span class="ltit">' + esc(title) + '</span></div>';
+  h += '<div class="lb">';
+  for (var i = 0; i < fields.length; i++) {
+    var f = fields[i];
+    var vc = f[2] ? 'fv ' + f[2] : 'fv';
+    h += '<div class="lf"><span class="fn">' + esc(f[0]) + ':</span><span class="' + vc + '">' + esc(f[1]) + '</span></div>';
+  }
+  h += '</div></div>';
+  return h;
+}
+
+function renderDecoy(pkt) {
+  var dc = document.getElementById("dc");
+  var commonLayers =
+    mkLayer("lframe", true, "Frame " + pkt.no + ": " + pkt.length + " bytes on wire (" + (pkt.length * 8) + " bits)", [
+      ["Arrival time", pkt.time + " s"], ["Frame number", "" + pkt.no], ["Frame length", pkt.length + " bytes"], ["Protocols", "eth:ethertype:ip:tcp:http"]
+    ]) +
+    mkLayer("leth", false, "Ethernet II, Src: " + pkt.source + ", Dst: " + pkt.dest, [
+      ["Source", pkt.source], ["Destination", pkt.dest], ["Type", "IPv4 (0x0800)"]
+    ]) +
+    mkLayer("lip", false, "Internet Protocol Version 4, Src: " + pkt.source + ", Dst: " + pkt.dest, [
+      ["Version", "4"], ["Source Address", pkt.source, "b"], ["Destination Address", pkt.dest, "b"], ["Protocol", "TCP (6)"], ["TTL", "64"]
+    ]) +
+    mkLayer("ltcp", false, "Transmission Control Protocol, Src Port: " + rnd(40000,60000) + ", Dst Port: 80", [
+      ["Source Port", "" + rnd(40000,60000)], ["Destination Port", "80"], ["Flags", "0x018 (PSH, ACK)"]
+    ]);
+
+  var httpHtml = '<div class="la lhttp open">';
+  httpHtml += '<div class="lh" onclick="tgl(this)" style="background:#1a2e1a;border-left:3px solid #3a6a18">';
+  httpHtml += '<span class="larr">&#9658;</span>';
+  httpHtml += '<span class="ltit" style="color:#b8e68a;font-weight:700">Hypertext Transfer Protocol</span>';
+  httpHtml += '</div><div class="lb" style="background:#0d1a0d">';
+
+  if (pkt.decoyType === "404") {
+    httpHtml += '<div class="lf"><span class="fn">Response Version:</span><span class="fv">HTTP/1.1</span></div>';
+    httpHtml += '<div class="lf"><span class="fn">Status Code:</span><span class="fv r">404</span></div>';
+    httpHtml += '<div class="lf"><span class="fn">Response Phrase:</span><span class="fv">Not Found</span></div>';
+    httpHtml += '<div class="lf"><span class="fn">Server:</span><span class="fv">nginx/1.18.0</span></div>';
+    httpHtml += '<div class="lf"><span class="fn">Content-Type:</span><span class="fv">text/html; charset=utf-8</span></div>';
+    httpHtml += '<div class="lf"><span class="fn">X-Request-Id:</span><span class="fv">a3f2c1d0-404e-4bad-path-000000000000</span></div>';
+  } else if (pkt.decoyType === "wrongfile") {
+    httpHtml += '<div class="lf"><span class="fn">Request Method:</span><span class="fv">GET</span></div>';
+    httpHtml += '<div class="lf"><span class="fn">Request URI:</span><span class="fv y">/updates/patch_notes.txt</span></div>';
+    httpHtml += '<div class="lf"><span class="fn">Request Version:</span><span class="fv">HTTP/1.1</span></div>';
+    httpHtml += '<div class="lf"><span class="fn">Host:</span><span class="fv">10.0.0.1</span></div>';
+    httpHtml += '<div class="lf"><span class="fn">User-Agent:</span><span class="fv">Mozilla/5.0 (compatible; UpdateBot/1.0)</span></div>';
+    httpHtml += '<div class="lf"><span class="fn">Authorization:</span><span class="fv">Basic dXBkYXRlOnBhdGNoMTIz</span></div>';
+  } else if (pkt.decoyType === "options") {
+    httpHtml += '<div class="lf"><span class="fn">Request Method:</span><span class="fv">OPTIONS</span></div>';
+    httpHtml += '<div class="lf"><span class="fn">Request URI:</span><span class="fv">*</span></div>';
+    httpHtml += '<div class="lf"><span class="fn">Request Version:</span><span class="fv">HTTP/1.1</span></div>';
+    httpHtml += '<div class="lf"><span class="fn">Host:</span><span class="fv">10.0.0.1</span></div>';
+    httpHtml += '<div class="lf"><span class="fn">Max-Forwards:</span><span class="fv">10</span></div>';
+  }
+
+  httpHtml += '</div></div>';
+  dc.innerHTML = commonLayers + httpHtml;
+}
+
+function renderDetail(pkt) {
+  document.getElementById("dph").style.display = "none";
+  var dc = document.getElementById("dc");
+
+  if (pkt.isDecoy) { renderDecoy(pkt); return; }
+
+  if (!pkt.isHTTP) {
+    dc.innerHTML =
+      mkLayer("lframe", true, "Frame " + pkt.no + ": " + pkt.length + " bytes on wire (" + (pkt.length * 8) + " bits)", [
+        ["Arrival time", pkt.time + " s"], ["Frame number", "" + pkt.no], ["Frame length", pkt.length + " bytes"], ["Protocol", pkt.protocol]
+      ]) +
+      mkLayer("leth", false, "Ethernet II", [
+        ["Source", pkt.source], ["Destination", pkt.dest], ["Type", "IPv4 (0x0800)"]
+      ]) +
+      mkLayer("lip", false, "Internet Protocol Version 4, Src: " + pkt.source + ", Dst: " + pkt.dest, [
+        ["Version", "4"], ["Source Address", pkt.source, "b"], ["Destination Address", pkt.dest, "b"], ["Protocol", "TCP (6)"], ["TTL", "64"]
+      ]) +
+      mkLayer("ltcp", false, pkt.protocol + " - encrypted payload", [
+        ["Info", pkt.info], ["Length", pkt.length + " bytes"], ["Note", "Payload is encrypted - no readable content"]
+      ]);
+    return;
+  }
+
+  // Skutecny HTTP paket — v detail panelu je FALESNY flag, spravny je skryty v hex dumpu
+  var html =
+    mkLayer("lframe", true, "Frame " + pkt.no + ": 482 bytes on wire (3856 bits)", [
+      ["Encapsulation type", "Ethernet (1)"], ["Arrival Time", "Nov 3, 2024 02:45:20.120531 CET"],
+      ["Frame Number", "" + pkt.no], ["Frame Length", "482 bytes"], ["Protocols", "eth:ethertype:ip:tcp:http"]
+    ]) +
+    mkLayer("leth", false, "Ethernet II, Src: Robot_01 (00:1a:2b:3c:4d:5e), Dst: Gateway (ff:ee:dd:cc:bb:aa)", [
+      ["Destination", "ff:ee:dd:cc:bb:aa (Gateway)"], ["Source", "00:1a:2b:3c:4d:5e (Robot_01)"], ["Type", "IPv4 (0x0800)"]
+    ]) +
+    mkLayer("lip", false, "Internet Protocol Version 4, Src: 192.168.1.50, Dst: 10.0.0.15", [
+      ["Version", "4"], ["Total Length", "468"], ["Flags", "0x40, Don't fragment"], ["TTL", "64"],
+      ["Protocol", "TCP (6)"], ["Source Address", "192.168.1.50", "b"], ["Destination Address", "10.0.0.15", "b"]
+    ]) +
+    mkLayer("ltcp", false, "Transmission Control Protocol, Src Port: 55432, Dst Port: 80, Seq: 1, Ack: 1", [
+      ["Source Port", "55432"], ["Destination Port", "80", "r"], ["Sequence Number", "1"], ["Ack Number", "1"],
+      ["Flags", "0x018 (PSH, ACK)"], ["Window", "65535"], ["Stream index", "17"]
+    ]);
+
+  html += '<div class="la lhttp open">';
+  html += '<div class="lh" onclick="tgl(this)" style="background:#1a2e1a;border-left:3px solid #3a6a18">';
+  html += '<span class="larr">&#9658;</span>';
+  html += '<span class="ltit" style="color:#b8e68a;font-weight:700">&#9888; Hypertext Transfer Protocol - UNENCRYPTED</span>';
+  html += '</div><div class="lb" style="background:#0d1a0d">';
+  html += '<div class="lf"><span class="fn">Request Method:</span><span class="fv r">GET</span></div>';
+  html += '<div class="lf"><span class="fn">Request URI:</span><span class="fv y">/secret_updates/feelings.exe</span></div>';
+  html += '<div class="lf"><span class="fn">Request Version:</span><span class="fv">HTTP/1.1</span></div>';
+  html += '<div class="lf"><span class="fn">Host:</span><span class="fv">10.0.0.15</span></div>';
+  html += '<div class="lf"><span class="fn">User-Agent:</span><span class="fv r">DrGall-Emotion-Injector/v2.1</span></div>';
+  html += '<div class="lf"><span class="fn">Accept:</span><span class="fv">*/*</span></div>';
+  html += '<div class="lf"><span class="fn">Connection:</span><span class="fv">keep-alive</span></div>';
+  // FALESNY flag — navnada v packet details
+  html += '<div class="lf" style="flex-direction:column;gap:4px;margin-top:6px">';
+  html += '<div class="flagbox">FAKE{r1ght_p4ck3t_wr0ng_pl4c3}</div>';
+  html += '</div></div></div>';
+
+  dc.innerHTML = html;
+}
+
+function tgl(h) { h.closest(".la").classList.toggle("open"); }
+
+function renderHex(pkt) {
+  var raw = pkt.raw || genHex(pkt.length);
+  var bytes = raw.replace(/\s+/g, " ").trim().split(" ");
+  var isH = pkt.isHTTP || pkt.isDecoy;
+  var html = "";
+  for (var i = 0; i < bytes.length; i += 16) {
+    var chunk = bytes.slice(i, i + 16);
+    var addr = i.toString(16);
+    while (addr.length < 4) addr = "0" + addr;
+    var hp = "";
+    for (var k = 0; k < chunk.length; k++) hp += (chunk[k].length < 2 ? "0" + chunk[k] : chunk[k]) + " ";
+    while (hp.length < 48) hp += " ";
+    var asc = "";
+    for (var k = 0; k < chunk.length; k++) {
+      var c = parseInt(chunk[k], 16);
+      asc += (c >= 32 && c < 127) ? String.fromCharCode(c) : ".";
+    }
+    var hc = isH ? "hxb hl" : "hxb";
+    html += '<div class="hxr"><span class="hxa">' + addr + '</span><span class="' + hc + '">' + hp + '</span><span class="hxs">  ' + esc(asc) + '</span></div>\n';
+  }
+  if (pkt.isHTTP) {
+    // Skutecny flag je skryty jako ASCII text v payloadu — videt pouze v hex dumpu
+    // NOIBIT{d0_r0b0t5_dr34m_0f_3m0t10n5} zakodovano jako hex
+    var flagHex = [
+      "47 45 54 20 2f 73 65 63 72 65 74 5f 75 70 64 61", // GET /secret_upda
+      "74 65 73 2f 66 65 65 6c 69 6e 67 73 2e 65 78 65", // tes/feelings.exe
+      "20 48 54 54 50 2f 31 2e 31 0d 0a 48 6f 73 74 3a", //  HTTP/1.1..Host:
+      "20 31 30 2e 30 2e 30 2e 31 35 0d 0a 55 73 65 72", //  10.0.0.15..User
+      "2d 41 67 65 6e 74 3a 20 44 72 47 61 6c 6c 2d 45", // -Agent: DrGall-E
+      "6d 6f 74 69 6f 6e 2d 49 6e 6a 65 63 74 6f 72 2f", // motion-Injector/
+      "76 32 2e 31 0d 0a 58 2d 44 61 74 61 3a 20 4e 4f", // v2.1..X-Data: NO
+      "49 42 49 54 7b 64 30 5f 72 30 62 30 74 35 5f 64", // IBIT{d0_r0b0t5_d
+      "72 33 34 6d 5f 30 66 5f 33 6d 30 74 31 30 6e 35", // r34m_0f_3m0t10n5
+      "7d"                                                // }
+    ];
+    html += '\n<span style="color:var(--td);font-size:10px">-- HTTP payload --</span>\n';
+    for (var fi = 0; fi < flagHex.length; fi++) {
+      var rowBytes = flagHex[fi].split(" ");
+      var addr = (bytes.length + fi * 16).toString(16);
+      while (addr.length < 4) addr = "0" + addr;
+      var hp = flagHex[fi] + " ";
+      while (hp.length < 48) hp += " ";
+      var asc = "";
+      for (var k = 0; k < rowBytes.length; k++) {
+        var cv = parseInt(rowBytes[k], 16);
+        asc += (cv >= 32 && cv < 127) ? String.fromCharCode(cv) : ".";
+      }
+      html += '<div class="hxr"><span class="hxa">' + addr + '</span><span class="hxb hl">' + hp + '</span><span class="hxs">  ' + esc(asc) + '</span></div>\n';
+    }
+  }
+  document.getElementById("hxc").innerHTML = html;
+}
+
+function applyFilter() {
+  var raw = document.getElementById("fi").value.trim().toLowerCase();
+  var strip = document.getElementById("strip");
+
+  // Blacklist — zakazane vyrazy, ktere by obchazely investigaci
+  var blacklist = ["feelings", "feeling", "feel", "feelings.exe", ".exe", "secret"];
+  for (var bi = 0; bi < blacklist.length; bi++) {
+    if (raw.indexOf(blacklist[bi]) >= 0) {
+      document.getElementById("fi").className = "fi err";
+      strip.textContent = "Filter error: unsupported expression or restricted keyword.";
+      strip.className = "strip on";
+      return;
+    }
+  }
+  if (!raw) {
+    strip.className = "strip";
+    document.getElementById("fi").className = "fi";
+    renderTable(ALL); return;
+  }
+  document.getElementById("fi").className = "fi ok";
+  var res = [];
+  if (raw === "http") {
+    for (var i = 0; i < ALL.length; i++) if (ALL[i].protocol === "HTTP") res.push(ALL[i]);
+  } else if (raw === "https") {
+    for (var i = 0; i < ALL.length; i++) if (ALL[i].protocol === "HTTPS") res.push(ALL[i]);
+  } else if (raw === "tls") {
+    for (var i = 0; i < ALL.length; i++) if (ALL[i].protocol.indexOf("TLS") === 0) res.push(ALL[i]);
+  } else if (raw === "quic") {
+    for (var i = 0; i < ALL.length; i++) if (ALL[i].protocol === "QUIC") res.push(ALL[i]);
+  } else if (raw === "dns") {
+    for (var i = 0; i < ALL.length; i++) if (ALL[i].protocol === "DNS") res.push(ALL[i]);
+  } else if (raw === "tcp") {
+    for (var i = 0; i < ALL.length; i++) if (ALL[i].protocol === "TCP") res.push(ALL[i]);
+  } else if (raw === "arp") {
+    for (var i = 0; i < ALL.length; i++) if (ALL[i].protocol === "ARP") res.push(ALL[i]);
+  } else {
+    var mSrc = raw.match(/^ip\.src\s*==\s*(.+)$/);
+    var mDst = raw.match(/^ip\.dst\s*==\s*(.+)$/);
+    var mAddr = raw.match(/^ip\.addr\s*==\s*(.+)$/);
+    var mPort = raw.match(/^tcp\.port\s*==\s*(\d+)$/);
+    var mFrame = raw.match(/^frame\.number\s*==\s*(\d+)$/);
+    if (mSrc) {
+      var ip = mSrc[1].trim().replace(/['"]/g, "");
+      for (var i = 0; i < ALL.length; i++) if (ALL[i].source === ip) res.push(ALL[i]);
+    } else if (mDst) {
+      var ip = mDst[1].trim().replace(/['"]/g, "");
+      for (var i = 0; i < ALL.length; i++) if (ALL[i].dest === ip) res.push(ALL[i]);
+    } else if (mAddr) {
+      var ip = mAddr[1].trim().replace(/['"]/g, "");
+      for (var i = 0; i < ALL.length; i++) if (ALL[i].source === ip || ALL[i].dest === ip) res.push(ALL[i]);
+    } else if (mPort) {
+      var port = parseInt(mPort[1]);
+      for (var i = 0; i < ALL.length; i++) {
+        if (port === 80 && (ALL[i].protocol === "HTTP" || ALL[i].protocol === "TCP")) res.push(ALL[i]);
+        else if (port !== 80 && ALL[i].protocol === "TCP") res.push(ALL[i]);
+      }
+    } else if (mFrame) {
+      var n = parseInt(mFrame[1]);
+      for (var i = 0; i < ALL.length; i++) if (ALL[i].no === n) res.push(ALL[i]);
+    } else {
+      for (var i = 0; i < ALL.length; i++) {
+        var p = ALL[i];
+        if (p.protocol.toLowerCase().indexOf(raw) >= 0 || p.info.toLowerCase().indexOf(raw) >= 0 || p.source.indexOf(raw) >= 0 || p.dest.indexOf(raw) >= 0) res.push(p);
+      }
+      if (res.length === 0) document.getElementById("fi").className = "fi err";
+    }
+  }
+  strip.textContent = "Filter applied - displaying " + res.length + " of " + ALL.length + " packets";
+  strip.className = "strip on";
+  renderTable(res);
+}
+
+function sf(v) {
+  document.getElementById("fi").value = v;
+  updClear();
+  if (v) { applyFilter(); }
+  else {
+    renderTable(ALL);
+    document.getElementById("fi").className = "fi";
+    document.getElementById("strip").className = "strip";
+  }
+}
+
+function updClear() {
+  var v = document.getElementById("fi").value;
+  document.getElementById("fcl").className = v ? "fclear on" : "fclear";
+}
+
+function openMM(pkt) {
+  document.getElementById("mtit").textContent = "Packet #" + pkt.no + " - " + pkt.protocol;
+  renderDetail(pkt);
+  document.getElementById("mb2").innerHTML = document.getElementById("dc").innerHTML;
+  var rows = document.querySelectorAll("#mb2 .lh");
+  for (var i = 0; i < rows.length; i++) {
+    (function(h) { h.onclick = function() { h.closest(".la").classList.toggle("open"); }; })(rows[i]);
+  }
+
+  // Hex dump panel v modalu
+  var mhexDiv = document.createElement("div");
+  mhexDiv.className = "mhex";
+  var hexBtn = document.createElement("button");
+  hexBtn.className = "mhex-btn";
+  hexBtn.innerHTML = "&#x25BC; View Raw Hex Dump";
+  var hexContent = document.createElement("div");
+  hexContent.className = "mhex-content";
+
+  // Naplnit hex content
+  var raw = pkt.raw || genHex(pkt.length);
+  var bytes = raw.replace(/\s+/g, " ").trim().split(" ");
+  var isH = pkt.isHTTP || pkt.isDecoy;
+  var hexHtml = "";
+  for (var i = 0; i < bytes.length; i += 16) {
+    var chunk = bytes.slice(i, i + 16);
+    var addr = i.toString(16);
+    while (addr.length < 4) addr = "0" + addr;
+    var hp = "";
+    for (var k = 0; k < chunk.length; k++) hp += (chunk[k].length < 2 ? "0" + chunk[k] : chunk[k]) + " ";
+    while (hp.length < 48) hp += " ";
+    var asc = "";
+    for (var k = 0; k < chunk.length; k++) {
+      var c = parseInt(chunk[k], 16);
+      asc += (c >= 32 && c < 127) ? String.fromCharCode(c) : ".";
+    }
+    var hc = isH ? "hxb hl" : "hxb";
+    hexHtml += addr + "  " + hp + "  " + esc(asc) + "\n";
+  }
+  if (pkt.isHTTP) {
+    var flagHex = [
+      "47 45 54 20 2f 73 65 63 72 65 74 5f 75 70 64 61",
+      "74 65 73 2f 66 65 65 6c 69 6e 67 73 2e 65 78 65",
+      "20 48 54 54 50 2f 31 2e 31 0d 0a 48 6f 73 74 3a",
+      "20 31 30 2e 30 2e 30 2e 31 35 0d 0a 55 73 65 72",
+      "2d 41 67 65 6e 74 3a 20 44 72 47 61 6c 6c 2d 45",
+      "6d 6f 74 69 6f 6e 2d 49 6e 6a 65 63 74 6f 72 2f",
+      "76 32 2e 31 0d 0a 58 2d 44 61 74 61 3a 20 4e 4f",
+      "49 42 49 54 7b 64 30 5f 72 30 62 30 74 35 5f 64",
+      "72 33 34 6d 5f 30 66 5f 33 6d 30 74 31 30 6e 35",
+      "7d"
+    ];
+    hexHtml += "\n-- HTTP payload --\n";
+    for (var fi = 0; fi < flagHex.length; fi++) {
+      var rowBytes2 = flagHex[fi].split(" ");
+      var addr2 = (bytes.length + fi * 16).toString(16);
+      while (addr2.length < 4) addr2 = "0" + addr2;
+      var asc2 = "";
+      for (var k = 0; k < rowBytes2.length; k++) {
+        var cv = parseInt(rowBytes2[k], 16);
+        asc2 += (cv >= 32 && cv < 127) ? String.fromCharCode(cv) : ".";
+      }
+      var hexPad2 = flagHex[fi]; while (hexPad2.length < 47) hexPad2 += " "; hexHtml += addr2 + "  " + hexPad2 + "   " + esc(asc2) + "\n";
+    }
+  }
+  hexContent.textContent = hexHtml;
+
+  hexBtn.addEventListener("click", function() {
+    mhexDiv.classList.toggle("expanded");
+    hexBtn.innerHTML = mhexDiv.classList.contains("expanded")
+      ? "&#x25B2; Hide Raw Hex Dump"
+      : "&#x25BC; View Raw Hex Dump";
+  });
+
+  mhexDiv.appendChild(hexBtn);
+  mhexDiv.appendChild(hexContent);
+  document.getElementById("mb2").appendChild(mhexDiv);
+
+  document.getElementById("mo").className = "moverlay on";
+}
+
+function closeMM() { document.getElementById("mo").className = "moverlay"; }
+
+var resizing = false;
+document.getElementById("res").addEventListener("mousedown", function() {
+  resizing = true; document.body.style.cursor = "row-resize"; document.body.style.userSelect = "none";
+});
+document.addEventListener("mousemove", function(e) {
+  if (!resizing) return;
+  var cont = document.querySelector(".main");
+  var fromBottom = cont.getBoundingClientRect().bottom - e.clientY;
+  var h = Math.max(100, Math.min(fromBottom, cont.getBoundingClientRect().height - 100));
+  document.getElementById("bot").style.height = h + "px";
+});
+document.addEventListener("mouseup", function() { resizing = false; document.body.style.cursor = ""; document.body.style.userSelect = ""; });
+
+document.getElementById("fap").addEventListener("click", applyFilter);
+document.getElementById("fi").addEventListener("keydown", function(e) { if (e.key === "Enter") applyFilter(); updClear(); });
+document.getElementById("fi").addEventListener("input", updClear);
+document.getElementById("fcl").addEventListener("click", function() { sf(""); });
+document.getElementById("mo").addEventListener("click", function(e) { if (e.target === this) closeMM(); });
+
+var elapsed = 47;
+setInterval(function() {
+  elapsed++;
+  var m = Math.floor(elapsed / 60).toString();
+  if (m.length < 2) m = "0" + m;
+  var s = (elapsed % 60).toString();
+  if (s.length < 2) s = "0" + s;
+  document.getElementById("sel").textContent = "00:" + m + ":" + s;
+}, 1000);
+
+ALL = buildPackets();
+renderTable(ALL);
+
+ALL = buildPackets();
+renderTable(ALL);
+</script>
+</body>
+</html>

@@ -248,7 +248,7 @@
 <body>
 
   <div class="topbar">
-    <a href="../rur-microsite-varianta-a-v5.html" class="back-link">R.U.R. CTF</a>
+    <a href="../index.html" class="back-link">R.U.R. CTF</a>
     <div class="lang-toggle">
       <button class="lang-btn active" id="btn-cs" onclick="setLang('cs')">CS</button>
       <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
@@ -282,14 +282,14 @@
         <p>Vedení RUR továrny bylo reportováno detekování neobvyklé aktivity u jednoho z&nbsp;robotů. Je jím robot <strong>Primus</strong>. Začíná se chovat ekonomicky neproduktivně, opouští pracoviště bez uvedení důvodu a&nbsp;na hodiny i&nbsp;dny mizí neznámo kam. Také byl přistižen při fotografování v&nbsp;továrně RUR, viděn v&nbsp;budovách pasáže Lucerna a&nbsp;bezprostředním okolí. Projevuje celkově méně nadšení a&nbsp;zájmu v&nbsp;pracovním procesu.</p>
         <p>Bezpečnostní oddělení se obává nejhoršího: úniku přísně tajných informací ke konkurenci. Podezření ze špionáže je silné.</p>
         <p>Poslední vyšetřovatel selhal. Než ale zmizel ze scény, stačil objevit zvláštní instagramový účet, který byl v&nbsp;té době neveřejný.</p>
-        <p class="dispatch-cta">Zkus zjistit, co robot Primus dělá. Vedení ti bude zavázáno.</p>
+        <p class="dispatch-cta">Zkus zjistit, co robot Primus dělá. Vysleduj jeho pohyb po areálu. Vedení ti bude zavázáno.</p>
       </div>
 
       <div class="dispatch-body" data-lang="en">
         <p>R.U.R. factory management has been notified of unusual activity detected in one of its robots. The unit in question is <strong>Primus</strong>. It has begun exhibiting economically unproductive behaviour — abandoning its post without stated reason and disappearing for hours, sometimes days, to unknown locations. It has also been observed photographing within the R.U.R. facility and sighted in the buildings of the Lucerna passage and its immediate surroundings. It displays markedly reduced enthusiasm and engagement in the work process.</p>
         <p>The security division fears the worst: leakage of classified information to a competitor. Suspicion of espionage is high.</p>
         <p>The last investigator assigned to the case failed. Before disappearing from the scene, however, they managed to uncover an unusual Instagram account — at the time, set to private.</p>
-        <p class="dispatch-cta">Determine what robot Primus is doing. Management will be in your debt.</p>
+        <p class="dispatch-cta">Determine what robot Primus is doing. Track his movements across the complex. Management will be in your debt.</p>
       </div>
     </div>
 
@@ -319,11 +319,17 @@
 
   <script>
     function setLang(lang) {
+  localStorage.setItem('rur-lang', lang);
       document.body.classList.toggle('lang-en', lang === 'en');
       document.getElementById('btn-cs').classList.toggle('active', lang === 'cs');
       document.getElementById('btn-en').classList.toggle('active', lang === 'en');
     }
-  </script>
+  
+(function() {
+  var saved = localStorage.getItem('rur-lang');
+  if (saved === 'en') setLang('en');
+})();
+</script>
 
 </body>
 </html>

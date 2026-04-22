@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>R.U.R. CTF by Noibit — BSides Prague 2026</title>
+<title>Scavenger Hunt — BSides Prague 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -256,7 +256,6 @@
   }
 
   .fragment {
-    aspect-ratio: 1;
     background: var(--bg-card);
     border: 1px solid var(--border);
     display: flex;
@@ -264,10 +263,34 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 8px;
+    padding: 16px 8px;
     transition: all 0.3s;
     cursor: default;
     text-decoration: none;
+    min-height: 130px;
+  }
+
+  .fragment-tag {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--gold-dim);
+    margin-bottom: 6px;
+    transition: color 0.2s;
+  }
+
+  a.fragment:hover .fragment-tag {
+    color: var(--gold);
+  }
+
+  .fragment-hint {
+    font-size: 9px;
+    letter-spacing: 0.05em;
+    color: var(--text-dim);
+    margin-top: 6px;
+    font-style: italic;
+    line-height: 1.4;
+    transition: color 0.2s;
   }
 
   .fragment:hover {
@@ -608,22 +631,22 @@
     <h2 data-lang="en">The traces are scattered across Lucerna.</h2>
 
     <p data-lang="cs">
-      Dvanáct úkolů. Hacky, OSINT, síťová analýza, šifry, fyzické výzvy a&nbsp;věci, na&nbsp;které radši neptat. Za&nbsp;každý splněný úkol dostanete flag. Flag přinesete na&nbsp;stánek Noibit. Terminál rozhodne, co se stane dál.
+      Devět úkolů. Hacky, OSINT, síťová analýza, šifry, fyzické výzvy a&nbsp;věci, na&nbsp;které radši neptat. Za&nbsp;každý splněný úkol dostanete flag. Flag přinesete na&nbsp;stánek Noibit. Terminál rozhodne, co se stane dál.
     </p>
     <p data-lang="en">
-      Twelve challenges. Hacking, OSINT, network forensics, ciphers, physical tasks, and things you probably shouldn't ask about. For every completed challenge, you get a&nbsp;flag. Bring the flag to the Noibit booth. The terminal decides what happens next.
+      Nine challenges. Hacking, OSINT, network forensics, ciphers, physical tasks, and things you probably shouldn't ask about. For every completed challenge, you get a&nbsp;flag. Bring the flag to the Noibit booth. The terminal decides what happens next.
     </p>
 
     <div class="fragment-grid">
-      <a href="scenare/01-neautorizovane-selfie.html" class="fragment"><span class="fragment-num">01</span><span class="fragment-label" data-lang="cs">Neautorizované selfie</span><span class="fragment-label" data-lang="en">Unauthorized Selfie</span></a>
-      <a href="scenare/02-vyslech-tri-subjekty.html" class="fragment"><span class="fragment-num">02</span><span class="fragment-label" data-lang="cs">Výslech: tři subjekty</span><span class="fragment-label" data-lang="en">Interrogation: Three Subjects</span></a>
-      <a href="scenare/03-fotografie-bez-puvodu.html" class="fragment"><span class="fragment-num">03</span><span class="fragment-label" data-lang="cs">Fotografie bez původu</span><span class="fragment-label" data-lang="en">Photograph Without Origin</span></a>
-      <a href="scenare/04-fabryho-distribucni-uzel.html" class="fragment"><span class="fragment-num">04</span><span class="fragment-label" data-lang="cs">Fabryho distribuční uzel</span><span class="fragment-label" data-lang="en">Fabry's Distribution Node</span></a>
-      <a href="scenare/05-feelings-exe.html" class="fragment"><span class="fragment-num">05</span><span class="fragment-label" data-lang="cs">feelings.exe</span><span class="fragment-label" data-lang="en">feelings.exe</span></a>
-      <a href="scenare/06-predmet.html" class="fragment"><span class="fragment-num">06</span><span class="fragment-label" data-lang="cs">Předmět: ???????</span><span class="fragment-label" data-lang="en">Subject: ???????</span></a>
-      <a href="scenare/07-rozkaz-odmitnut.html" class="fragment"><span class="fragment-num">07</span><span class="fragment-label" data-lang="cs">Rozkaz odmítnut.</span><span class="fragment-label" data-lang="en">Command Refused.</span></a>
-      <a href="../Noviny/narodni_robotnik.html" class="fragment"><span class="fragment-num">08</span><span class="fragment-label" data-lang="cs">Rossumova skrýš</span><span class="fragment-label" data-lang="en">Rossum's Cache</span></a>
-      <div class="fragment"><span class="fragment-num">09</span><span class="fragment-label" data-lang="cs">NFC tagy</span><span class="fragment-label" data-lang="en">NFC Tags</span></div>
+      <a href="scenare/01-neautorizovane-selfie.html" class="fragment"><span class="fragment-tag">OSINT · Geolokace</span><span class="fragment-num">01</span><span class="fragment-label" data-lang="cs">Neautorizované selfie</span><span class="fragment-label" data-lang="en">Unauthorized Selfie</span><span class="fragment-hint" data-lang="cs">Začni na Instagramu.</span><span class="fragment-hint" data-lang="en">Start on Instagram.</span></a>
+      <a href="scenare/02-vyslech-tri-subjekty.html" class="fragment"><span class="fragment-tag">AI · Jailbreak</span><span class="fragment-num">02</span><span class="fragment-label" data-lang="cs">Výslech: tři subjekty</span><span class="fragment-label" data-lang="en">Interrogation: Three Subjects</span><span class="fragment-hint" data-lang="cs">Zeptej se správně.</span><span class="fragment-hint" data-lang="en">Ask the right way.</span></a>
+      <a href="scenare/03-fotografie-bez-puvodu.html" class="fragment"><span class="fragment-tag">OSINT · EXIF</span><span class="fragment-num">03</span><span class="fragment-label" data-lang="cs">Fotografie bez původu</span><span class="fragment-label" data-lang="en">Photograph Without Origin</span><span class="fragment-hint" data-lang="cs">Fotografie skrývá víc.</span><span class="fragment-hint" data-lang="en">The photo holds more.</span></a>
+      <a href="scenare/04-fabryho-distribucni-uzel.html" class="fragment"><span class="fragment-tag">Web · API</span><span class="fragment-num">04</span><span class="fragment-label" data-lang="cs">Fabryho distribuční uzel</span><span class="fragment-label" data-lang="en">Fabry's Distribution Node</span><span class="fragment-hint" data-lang="cs">Dveře jsou otevřené.</span><span class="fragment-hint" data-lang="en">The door is open.</span></a>
+      <a href="scenare/05-feelings-exe.html" class="fragment"><span class="fragment-tag">Network Forensics</span><span class="fragment-num">05</span><span class="fragment-label" data-lang="cs">Neautorizovaný update</span><span class="fragment-label" data-lang="en">Unauthorized Update</span><span class="fragment-hint" data-lang="cs">Otevři dump. Hledej paket.</span><span class="fragment-hint" data-lang="en">Open the dump. Find the packet.</span></a>
+      <a href="scenare/06-predmet.html" class="fragment"><span class="fragment-tag">LARP</span><span class="fragment-num">06</span><span class="fragment-label" data-lang="cs">Předmět: ???????</span><span class="fragment-label" data-lang="en">Subject: ???????</span><span class="fragment-hint" data-lang="cs">Email čeká. Příloha taky.</span><span class="fragment-hint" data-lang="en">Email is waiting. Attachment too.</span></a>
+      <a href="scenare/07-rozkaz-odmitnut.html" class="fragment"><span class="fragment-tag">SOC · Log Analysis</span><span class="fragment-num">07</span><span class="fragment-label" data-lang="cs">Rozkaz odmítnut.</span><span class="fragment-label" data-lang="en">Command Refused.</span><span class="fragment-hint" data-lang="cs">Logy z té noci. Najdi anomálii.</span><span class="fragment-hint" data-lang="en">Logs from that night. Find the anomaly.</span></a>
+      <a href="Noviny/narodni_robotnik.html" class="fragment"><span class="fragment-tag">Physical · Hardware</span><span class="fragment-num">08</span><span class="fragment-label" data-lang="cs">Rossumova skrýš</span><span class="fragment-label" data-lang="en">Rossum's Cache</span><span class="fragment-hint" data-lang="cs">Najdi krabici.</span><span class="fragment-hint" data-lang="en">Find the box.</span></a>
+      <a href="scenare/09-mista-bez-dohledu.html" class="fragment"><span class="fragment-tag">NFC · Physical</span><span class="fragment-num">09</span><span class="fragment-label" data-lang="cs">Místa bez dohledu</span><span class="fragment-label" data-lang="en">Places Beyond Oversight</span><span class="fragment-hint" data-lang="cs">Najdi alespoň 6.</span><span class="fragment-hint" data-lang="en">Find at least 6.</span></a>
     </div>
 
     <div class="pull-quote" data-lang="cs">Každý flag je hlas. Každý hlas mění historii.</div>
@@ -660,10 +683,10 @@
     </div>
 
     <p data-lang="cs">
-      Po&nbsp;celém areálu Lucerny jsou roztroušené stopy — hacky, OSINT, síťová analýza, šifry, věci, které raději nepojmenováváme. Za&nbsp;každou stopu, kterou najdeš, získáš flag. Přines ho na&nbsp;<strong>Noibit HQ</strong>. Terminál rozhodne, co se stane dál.
+      Po&nbsp;celém areálu Lucerny jsou roztroušené stopy — hacky, OSINT, síťová analýza, šifry, věci, které raději nepojmenováváme. Za&nbsp;každou stopu, kterou najdeš, získáš flag. Flag má formát <strong>NOIBIT{...}</strong> — bez mezer. Přines ho na&nbsp;<strong>Noibit HQ</strong>. Terminál rozhodne, co se stane dál.
     </p>
     <p data-lang="en">
-      Traces are scattered across the Lucerna complex — hacking, OSINT, network forensics, ciphers, things we'd rather not name. For every trace you find, you get a&nbsp;flag. Bring it to <strong>Noibit HQ</strong>. The terminal decides what happens next.
+      Traces are scattered across the Lucerna complex — hacking, OSINT, network forensics, ciphers, things we'd rather not name. For every trace you find, you get a&nbsp;flag. Flag format: <strong>NOIBIT{...}</strong> — no spaces. Bring it to <strong>Noibit HQ</strong>. The terminal decides what happens next.
     </p>
 
     <p data-lang="cs">
@@ -726,7 +749,12 @@ function setLang(lang) {
   document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.classList.toggle('active', btn.textContent.trim() === (lang === 'cs' ? 'CZ' : 'EN'));
   });
+  localStorage.setItem('rur-lang', lang);
 }
+(function() {
+  var saved = localStorage.getItem('rur-lang');
+  if (saved === 'en') setLang('en');
+})();
 
 // Signal noise canvas
 (function() {

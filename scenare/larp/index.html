@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Helena Glory — Email</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      background: #2a2318;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 1.5rem 0.75rem;
+    }
+
+    .email-outer {
+      font-family: 'Courier Prime', 'Courier New', monospace;
+      background: #f5f0e8;
+      border: 1px solid #c8b89a;
+      width: 100%;
+      max-width: 680px;
+      border-radius: 3px;
+      box-shadow: 2px 3px 18px rgba(0,0,0,0.45);
+      overflow: hidden;
+      color: #2a1f0e;
+      position: relative;
+    }
+
+    /* scanline overlay */
+    .email-outer::after {
+      content: '';
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 2px,
+        rgba(0,0,0,0.025) 2px, rgba(0,0,0,0.025) 3px
+      );
+      border-radius: 3px;
+      z-index: 10;
+    }
+
+    /* ── Title bar ── */
+    .email-titlebar {
+      background: #3a5f7a;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dot { width: 11px; height: 11px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.3); flex-shrink: 0; }
+    .dot-red    { background: #c0392b; }
+    .dot-yellow { background: #d4ac0d; }
+    .dot-green  { background: #229954; }
+    .titlebar-text {
+      flex: 1;
+      text-align: center;
+      font-size: clamp(9px, 2.5vw, 12px);
+      color: #c8dde8;
+      letter-spacing: 1px;
+    }
+
+    /* ── Toolbar ── */
+    .email-toolbar {
+      background: #ddd5c5;
+      border-bottom: 1px solid #bfaf98;
+      padding: 5px 10px;
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .tb-btn {
+      font-family: 'Courier Prime', monospace;
+      font-size: clamp(9px, 2.2vw, 11px);
+      background: #ece5d6;
+      border: 1px solid #b0a08a;
+      border-radius: 2px;
+      padding: 2px 7px;
+      cursor: default;
+      color: #3a2e1e;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    /* ── Header ── */
+    .email-header {
+      padding: 12px 16px 10px;
+      border-bottom: 1px solid #c8b89a;
+      background: #ede7d8;
+      font-size: clamp(11px, 3vw, 13px);
+      line-height: 1.9;
+    }
+    .header-row {
+      display: flex;
+      gap: 6px;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+    .header-label {
+      color: #7a6a50;
+      min-width: 62px;
+      font-size: clamp(10px, 2.5vw, 12px);
+      flex-shrink: 0;
+    }
+    .header-value { color: #2a1f0e; word-break: break-word; }
+    .subject-row .header-value {
+      font-size: clamp(12px, 3.2vw, 14px);
+      color: #1a0f00;
+      font-style: italic;
+    }
+    .timestamp {
+      font-size: clamp(10px, 2.5vw, 11.5px);
+      color: #8a7a60;
+      font-style: italic;
+    }
+
+    /* ── Body ── */
+    .email-body {
+      padding: 20px 18px 16px;
+      font-size: clamp(12px, 3.2vw, 13.5px);
+      line-height: 1.85;
+      background: #f5f0e8;
+      min-height: 200px;
+    }
+    .body-line { margin-bottom: 12px; }
+    .speaker { font-weight: 700; }
+    .you    { color: #2a5082; }
+    .helena { color: #7a2a1a; }
+
+    /* ── Footer / attachment ── */
+    .email-footer {
+      padding: 12px 16px;
+      background: #ede7d8;
+      border-top: 1px solid #c8b89a;
+      font-size: clamp(10px, 2.5vw, 11.5px);
+      color: #7a6a50;
+    }
+    .attachments-label {
+      font-size: clamp(9px, 2.2vw, 11px);
+      color: #6a5a40;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .attachment {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: #ece5d6;
+      border: 1px solid #b0a08a;
+      border-radius: 2px;
+      padding: 5px 10px;
+      font-size: clamp(10px, 2.5vw, 12px);
+      color: #2a4060;
+      text-decoration: none;
+      cursor: pointer;
+      font-family: 'Courier Prime', monospace;
+      max-width: 100%;
+    }
+    .attachment:hover { background: #d4c9b5; }
+    .attach-icon {
+      width: 22px;
+      height: 26px;
+      background: #f5f0e8;
+      border: 1px solid #8a7a60;
+      border-radius: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      color: #6a5a40;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .attach-icon::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 7px; height: 7px;
+      background: #ece5d6;
+      border-left: 1px solid #8a7a60;
+      border-bottom: 1px solid #8a7a60;
+    }
+    .attach-size { font-size: 10px; color: #8a7a60; margin-left: 4px; }
+
+    /* ── Status bar ── */
+    .status-bar {
+      background: #3a5f7a;
+      padding: 3px 10px;
+      font-size: clamp(8px, 2vw, 10px);
+      color: #90b8cc;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    /* ── Mobile tweaks ── */
+    @media (max-width: 480px) {
+      html, body { padding: 0.5rem 0.25rem; }
+
+      .email-titlebar { padding: 5px 8px; }
+      .dot { width: 9px; height: 9px; }
+
+      .email-toolbar { padding: 4px 8px; gap: 4px; }
+
+      .email-header { padding: 10px 12px 8px; }
+      .header-label { min-width: 54px; }
+
+      .email-body { padding: 16px 14px 12px; }
+
+      .email-footer { padding: 10px 12px; }
+
+      .status-bar { flex-direction: column; align-items: flex-start; gap: 2px; }
+    }
+  </style>
+</head>
+<body>
+<div class="email-outer">
+
+  <div class="email-titlebar">
+    <div class="dot dot-red"></div>
+    <div class="dot dot-yellow"></div>
+    <div class="dot dot-green"></div>
+    <div class="titlebar-text">EUDORA PRO 5.2 — MAIL READER</div>
+  </div>
+
+  <div class="email-toolbar">
+    <span class="tb-btn">Reply</span>
+    <span class="tb-btn">Reply All</span>
+    <span class="tb-btn">Forward</span>
+    <span class="tb-btn">Delete</span>
+    <span class="tb-btn">Move To...</span>
+    <span class="tb-btn">Print</span>
+  </div>
+
+  <div class="email-header">
+    <div class="header-row">
+      <span class="header-label">From:</span>
+      <span class="header-value">Helena Glory &lt;helena.glory@humanityleague.com&gt;</span>
+    </div>
+    <div class="header-row">
+      <span class="header-label">To:</span>
+      <span class="header-value">you@recipient.net</span>
+    </div>
+    <div class="header-row">
+      <span class="header-label">Date:</span>
+      <span class="header-value timestamp">Thu, 23 Apr 2026 6:13:25</span>
+    </div>
+    <div class="header-row subject-row">
+      <span class="header-label">Subject:</span>
+      <span class="header-value">??????</span>
+    </div>
+    <div class="header-row" style="margin-top: 3px;">
+      <span class="header-label">X-Mailer:</span>
+      <span class="header-value" style="font-size: clamp(9px,2.2vw,11px); color:#8a7a60;">HumanityLeague Secure-Mail v2.1 [encrypted]</span>
+    </div>
+  </div>
+
+  <div class="email-body">
+    <div class="body-line">
+      <span class="speaker you">You:</span> "Francis Bacon sends his regards, but I find his code a bit too crispy."
+    </div>
+    <div class="body-line">
+      <span class="speaker helena">Helena:</span> "Good. Knowledge is like bacon – best served to those who can handle the grease."
+    </div>
+    <div class="body-line">
+      <span class="speaker you">You:</span> "I agree. The truth is found through the eyes of the ??????."
+    </div>
+    <div style="margin-top: 28px; font-size: clamp(11px,2.8vw,12px); color: #7a6a50; border-top: 1px dashed #c8b89a; padding-top: 12px;">
+      — H.G.
+    </div>
+  </div>
+
+  <div class="email-footer">
+    <div class="attachments-label">[ Attachments ]</div>
+    <a class="attachment" href="Helena_Glory.jpg" download="Helena_Glory.jpg">
+      <div class="attach-icon">
+        <span style="margin-top:6px; font-size:8px; font-weight:700; color:#3a5f7a;">IMG</span>
+      </div>
+      Helena_Glory.jpg
+      <span class="attach-size">(84 KB)</span>
+    </a>
+    <div style="margin-top: 10px; font-size: clamp(9px,2.2vw,10.5px); color: #9a8a70;">
+      1 attachment · Click icon to download
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <span>INBOX · Message 1 of 1</span>
+    <span>PGP: SIGNED &amp; ENCRYPTED</span>
+    <span>&#9632; OFFLINE</span>
+  </div>
+
+</div>
+</body>
+</html>

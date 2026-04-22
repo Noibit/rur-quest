@@ -102,12 +102,174 @@
       color: var(--gold);
     }
 
-    /* Email screenshot — přirozená výška, žádný crop */
-    .scenario-image {
+    /* === INLINE EMAIL === */
+    .email-wrap {
+      margin-bottom: 48px;
+    }
+
+    .email-outer {
+      font-family: 'Courier Prime', 'Courier New', monospace;
+      background: #f5f0e8;
+      border: 1px solid #c8b89a;
       width: 100%;
-      display: block;
-      border: 1px solid var(--border);
-      filter: grayscale(10%) contrast(1.02);
+      border-radius: 3px;
+      box-shadow: 2px 3px 18px rgba(0,0,0,0.45);
+      overflow: hidden;
+      color: #2a1f0e;
+      position: relative;
+    }
+    .email-outer::after {
+      content: '';
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(to bottom, transparent 0px, transparent 2px, rgba(0,0,0,0.025) 2px, rgba(0,0,0,0.025) 3px);
+      border-radius: 3px;
+      z-index: 10;
+    }
+    .email-titlebar {
+      background: #3a5f7a;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .e-dot { width: 11px; height: 11px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.3); flex-shrink: 0; }
+    .e-dot-red    { background: #c0392b; }
+    .e-dot-yellow { background: #d4ac0d; }
+    .e-dot-green  { background: #229954; }
+    .email-titlebar-text {
+      flex: 1;
+      text-align: center;
+      font-size: clamp(9px, 2.5vw, 12px);
+      color: #c8dde8;
+      letter-spacing: 1px;
+    }
+    .email-toolbar {
+      background: #ddd5c5;
+      border-bottom: 1px solid #bfaf98;
+      padding: 5px 10px;
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .tb-btn {
+      font-family: 'Courier Prime', monospace;
+      font-size: clamp(9px, 2.2vw, 11px);
+      background: #ece5d6;
+      border: 1px solid #b0a08a;
+      border-radius: 2px;
+      padding: 2px 7px;
+      cursor: default;
+      color: #3a2e1e;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .email-header {
+      padding: 12px 16px 10px;
+      border-bottom: 1px solid #c8b89a;
+      background: #ede7d8;
+      font-size: clamp(11px, 3vw, 13px);
+      line-height: 1.9;
+    }
+    .e-header-row {
+      display: flex;
+      gap: 6px;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+    .e-header-label {
+      color: #7a6a50;
+      min-width: 62px;
+      font-size: clamp(10px, 2.5vw, 12px);
+      flex-shrink: 0;
+    }
+    .e-header-value { color: #2a1f0e; word-break: break-word; }
+    .e-subject-row .e-header-value {
+      font-size: clamp(12px, 3.2vw, 14px);
+      color: #1a0f00;
+      font-style: italic;
+    }
+    .e-timestamp {
+      font-size: clamp(10px, 2.5vw, 11.5px);
+      color: #8a7a60;
+      font-style: italic;
+    }
+    .email-body {
+      padding: 20px 18px 16px;
+      font-size: clamp(12px, 3.2vw, 13.5px);
+      line-height: 1.85;
+      background: #f5f0e8;
+    }
+    .e-body-line { margin-bottom: 12px; }
+    .e-speaker { font-weight: 700; }
+    .e-you    { color: #2a5082; }
+    .e-helena { color: #7a2a1a; }
+    .email-footer {
+      padding: 12px 16px;
+      background: #ede7d8;
+      border-top: 1px solid #c8b89a;
+      font-size: clamp(10px, 2.5vw, 11.5px);
+      color: #7a6a50;
+    }
+    .e-attachments-label {
+      font-size: clamp(9px, 2.2vw, 11px);
+      color: #6a5a40;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .e-attachment {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: #ece5d6;
+      border: 1px solid #b0a08a;
+      border-radius: 2px;
+      padding: 5px 10px;
+      font-size: clamp(10px, 2.5vw, 12px);
+      color: #2a4060;
+      text-decoration: none;
+      font-family: 'Courier Prime', monospace;
+      max-width: 100%;
+    }
+    .e-attachment:hover { background: #d4c9b5; }
+    .e-attach-icon {
+      width: 22px;
+      height: 26px;
+      background: #f5f0e8;
+      border: 1px solid #8a7a60;
+      border-radius: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      color: #6a5a40;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .e-attach-icon::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 7px; height: 7px;
+      background: #ece5d6;
+      border-left: 1px solid #8a7a60;
+      border-bottom: 1px solid #8a7a60;
+    }
+    .e-attach-size { font-size: 10px; color: #8a7a60; margin-left: 4px; }
+    .email-statusbar {
+      background: #3a5f7a;
+      padding: 3px 10px;
+      font-size: clamp(8px, 2vw, 10px);
+      color: #90b8cc;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 4px;
+      font-family: 'Courier Prime', monospace;
     }
 
     .dispatch-wrap {
@@ -183,7 +345,7 @@
 <body>
 
   <div class="topbar">
-    <a href="../rur-microsite-varianta-a-v5.html" class="back-link">R.U.R. CTF</a>
+    <a href="../index.html" class="back-link">R.U.R. CTF</a>
     <div class="lang-toggle">
       <button class="lang-btn active" id="btn-cs" onclick="setLang('cs')">CS</button>
       <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
@@ -204,24 +366,78 @@
       <div class="dispatch-label" data-lang="en">// Dispatch — R.U.R. Security Division</div>
 
       <div class="dispatch-body" data-lang="cs">
-        <p>Do schránky dorazila šifrovaná zpráva. Odesílatel: <strong>Helena Glory</strong>, Humanitární liga pro práva robotů.</p>
-        <p class="dispatch-cta">Příloha přiložena. Předmět: neznámý.</p>
+        <p>Do schránky dorazila záhadná zpráva. Odesílatel: <strong>Helena Glory</strong>, Humanitární liga pro práva robotů.</p>
       </div>
 
       <div class="dispatch-body" data-lang="en">
-        <p>An encrypted message has arrived. Sender: <strong>Helena Glory</strong>, Humanitarian League for Robot Rights.</p>
-        <p class="dispatch-cta">Attachment included. Subject: unknown.</p>
+        <p>A mysterious message has arrived. Sender: <strong>Helena Glory</strong>, Humanitarian League for Robot Rights.</p>
       </div>
     </div>
 
-    <!-- EMAIL SCREENSHOT -->
-    <figure>
-      <img
-        src="Scenare_obrazky/predmet_email.png"
-        alt="Zpráva od Heleny Glory — příloha přiložena"
-        class="scenario-image"
-      >
-    </figure>
+    <!-- INTERACTIVE EMAIL -->
+    <div class="email-wrap">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap">
+      <div class="email-outer">
+        <div class="email-titlebar">
+          <div class="e-dot e-dot-red"></div>
+          <div class="e-dot e-dot-yellow"></div>
+          <div class="e-dot e-dot-green"></div>
+          <div class="email-titlebar-text">EUDORA PRO 5.2 — MAIL READER</div>
+        </div>
+        <div class="email-toolbar">
+          <span class="tb-btn">Reply</span>
+          <span class="tb-btn">Reply All</span>
+          <span class="tb-btn">Forward</span>
+          <span class="tb-btn">Delete</span>
+          <span class="tb-btn">Move To...</span>
+          <span class="tb-btn">Print</span>
+        </div>
+        <div class="email-header">
+          <div class="e-header-row">
+            <span class="e-header-label">From:</span>
+            <span class="e-header-value">Helena Glory &lt;helena.glory@humanityleague.com&gt;</span>
+          </div>
+          <div class="e-header-row">
+            <span class="e-header-label">To:</span>
+            <span class="e-header-value">you@recipient.net</span>
+          </div>
+          <div class="e-header-row">
+            <span class="e-header-label">Date:</span>
+            <span class="e-header-value e-timestamp">Thu, 23 Apr 2026 6:13:25</span>
+          </div>
+          <div class="e-header-row e-subject-row">
+            <span class="e-header-label">Subject:</span>
+            <span class="e-header-value">??????</span>
+          </div>
+          <div class="e-header-row" style="margin-top:3px;">
+            <span class="e-header-label">X-Mailer:</span>
+            <span class="e-header-value" style="font-size:clamp(9px,2.2vw,11px);color:#8a7a60;">HumanityLeague Secure-Mail v2.1 [encrypted]</span>
+          </div>
+        </div>
+        <div class="email-body">
+          <div class="e-body-line"><span class="e-speaker e-you">You:</span> "Francis Bacon sends his regards, but I find his code a bit too crispy."</div>
+          <div class="e-body-line"><span class="e-speaker e-helena">Helena:</span> "Good. Knowledge is like bacon – best served to those who can handle the grease."</div>
+          <div class="e-body-line"><span class="e-speaker e-you">You:</span> "I agree. The truth is found through the eyes of the ??????."</div>
+          <div style="margin-top:28px;font-size:clamp(11px,2.8vw,12px);color:#7a6a50;border-top:1px dashed #c8b89a;padding-top:12px;font-family:'Courier Prime',monospace;">— H.G.</div>
+        </div>
+        <div class="email-footer">
+          <div class="e-attachments-label">[ Attachments ]</div>
+          <a class="e-attachment" href="larp/Helena_Glory.jpg" download="Helena_Glory.jpg">
+            <div class="e-attach-icon">
+              <span style="margin-top:6px;font-size:8px;font-weight:700;color:#3a5f7a;">IMG</span>
+            </div>
+            Helena_Glory.jpg
+            <span class="e-attach-size">(84 KB)</span>
+          </a>
+          <div style="margin-top:10px;font-size:clamp(9px,2.2vw,10.5px);color:#9a8a70;">1 attachment · Click icon to download</div>
+        </div>
+        <div class="email-statusbar">
+          <span>INBOX · Message 1 of 1</span>
+          <span>PGP: SIGNED &amp; ENCRYPTED</span>
+          <span>&#9632; OFFLINE</span>
+        </div>
+      </div>
+    </div>
 
   </div>
 
@@ -236,11 +452,17 @@
 
   <script>
     function setLang(lang) {
+  localStorage.setItem('rur-lang', lang);
       document.body.classList.toggle('lang-en', lang === 'en');
       document.getElementById('btn-cs').classList.toggle('active', lang === 'cs');
       document.getElementById('btn-en').classList.toggle('active', lang === 'en');
     }
-  </script>
+  
+(function() {
+  var saved = localStorage.getItem('rur-lang');
+  if (saved === 'en') setLang('en');
+})();
+</script>
 
 </body>
 </html>
